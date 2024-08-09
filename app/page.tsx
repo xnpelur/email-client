@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import {
-    ColumnDef,
     ColumnFiltersState,
     flexRender,
     getCoreRowModel,
@@ -14,9 +13,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { formatRelative } from "date-fns";
-import { ru } from "date-fns/locale";
 import { CaretLeftIcon, CaretRightIcon } from "@radix-ui/react-icons";
+import { getEmailColumns } from "@/lib/columns";
+import { Email } from "@/types/email";
 
 const data: Email[] = [
     {
@@ -71,34 +70,8 @@ const data: Email[] = [
     },
 ];
 
-export type Email = {
-    author: string;
-    title: string;
-    date: Date;
-};
-
-export const columns: ColumnDef<Email>[] = [
-    {
-        accessorKey: "author",
-        cell: ({ row }) => <div>{row.getValue("author")}</div>,
-    },
-    {
-        accessorKey: "title",
-        cell: ({ row }) => <div>{row.getValue("title")}</div>,
-    },
-    {
-        accessorKey: "date",
-        cell: ({ row }) => (
-            <div className="text-right">
-                {formatRelative(row.getValue("date"), new Date(), {
-                    locale: ru,
-                })}
-            </div>
-        ),
-    },
-];
-
 export default function Home() {
+    const columns = getEmailColumns();
     const [columnFilters, setColumnFilters] =
         React.useState<ColumnFiltersState>([]);
 
