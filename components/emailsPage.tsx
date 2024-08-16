@@ -41,8 +41,8 @@ export default function EmailsPage(props: Props) {
 
     return (
         <div className="w-full px-4">
-            <div className="flex justify-between py-4">
-                <h1 className="text-2xl font-semibold">{props.title}</h1>
+            <div className="flex flex-col items-center justify-between py-4 lg:flex-row">
+                <h1 className="flex-1 text-2xl font-semibold">{props.title}</h1>
                 <Input
                     placeholder="Поиск..."
                     value={
@@ -57,7 +57,7 @@ export default function EmailsPage(props: Props) {
                     }
                     className="max-w-lg"
                 />
-                <div></div>
+                <div className="flex-1"></div>
             </div>
             <div className="rounded-md border">
                 <Table>
