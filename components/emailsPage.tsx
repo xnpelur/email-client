@@ -1,5 +1,3 @@
-"use client";
-
 import {
     ColumnFiltersState,
     flexRender,
@@ -20,10 +18,11 @@ import { useState } from "react";
 type Props = {
     title: string;
     data: Email[];
+    getContactText: (email: Email) => string;
 };
 
 export default function EmailsPage(props: Props) {
-    const columns = getEmailColumns();
+    const columns = getEmailColumns(props.getContactText);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
     const table = useReactTable({

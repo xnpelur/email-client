@@ -1,5 +1,6 @@
 export type Email = {
-    author: string;
+    from: string;
+    to: string;
     title: string;
     date: Date;
 };

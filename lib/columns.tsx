@@ -3,10 +3,12 @@ import { Email } from "@/types/email";
 import { formatRelative } from "date-fns";
 import { ru } from "date-fns/locale";
 
-export const getEmailColumns = (): ColumnDef<Email>[] => [
+export const getEmailColumns = (
+    getContactText: (email: Email) => string,
+): ColumnDef<Email>[] => [
     {
-        accessorKey: "author",
-        cell: ({ row }) => <div>{row.getValue("author")}</div>,
+        accessorKey: "contact",
+        cell: ({ row }) => <div>{getContactText(row.original)}</div>,
     },
     {
         accessorKey: "title",

@@ -1,59 +1,77 @@
+"use client";
+
 import EmailsPage from "@/components/emailsPage";
 import { Email } from "@/types/email";
 
 const data: Email[] = [
     {
-        author: "Ken",
+        from: "Ken",
+        to: "You",
         title: "Re: Important Update",
         date: new Date("2024-08-08"),
     },
     {
-        author: "Abe",
+        from: "Abe",
+        to: "You",
         title: "Meeting Agenda",
         date: new Date("2024-08-07"),
     },
     {
-        author: "Monserrat",
+        from: "Monserrat",
+        to: "You",
         title: "Project Proposal",
         date: new Date("2024-08-06"),
     },
     {
-        author: "Silas",
+        from: "Silas",
+        to: "You",
         title: "Weekly Report",
         date: new Date("2024-08-05"),
     },
     {
-        author: "Carmella",
+        from: "Carmella",
+        to: "You",
         title: "Vacation Request",
         date: new Date("2024-08-04"),
     },
     {
-        author: "Elena",
+        from: "Elena",
+        to: "You",
         title: "Client Feedback",
         date: new Date("2024-08-03"),
     },
     {
-        author: "Liam",
+        from: "Liam",
+        to: "You",
         title: "Budget Review",
         date: new Date("2024-08-02"),
     },
     {
-        author: "Sophia",
+        from: "Sophia",
+        to: "You",
         title: "Team Building Event",
         date: new Date("2024-08-01"),
     },
     {
-        author: "Oliver",
+        from: "Oliver",
+        to: "You",
         title: "Product Launch",
         date: new Date("2024-07-31"),
     },
     {
-        author: "Isabella",
+        from: "Isabella",
+        to: "You",
         title: "Training Schedule",
         date: new Date("2024-07-30"),
     },
 ];
 
 export default function InboxPage() {
-    return <EmailsPage data={data} title="Входящие" />;
+    return (
+        <EmailsPage
+            data={data}
+            title="Входящие"
+            getContactText={(email) => email.from}
+        />
+    );
 }
