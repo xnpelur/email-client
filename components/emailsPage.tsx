@@ -13,7 +13,7 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { CaretLeftIcon, CaretRightIcon } from "@radix-ui/react-icons";
 import { getEmailColumns } from "@/lib/columns";
 import { Email } from "@/types/email";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 type Props = {
     title: string;
@@ -37,6 +37,16 @@ export default function EmailsPage(props: Props) {
             columnFilters,
         },
     });
+
+    const { pageIndex, pageSize } = table.getState().pagination;
+    const rowsCount = table.getFilteredRowModel().rows.length;
+
+    const rowsShownString = useMemo(() => {
+        const startRow = rowsCount != 0 ? pageIndex * pageSize + 1 : 0;
+        const endRow = Math.min((pageIndex + 1) * pageSize, rowsCount);
+
+        return `${startRow} - ${endRow} из ${rowsCount}`;
+    }, [pageIndex, pageSize, rowsCount]);
 
     return (
         <div className="w-full px-4">
@@ -92,7 +102,10 @@ export default function EmailsPage(props: Props) {
                     </TableBody>
                 </Table>
             </div>
-            <div className="flex items-center justify-end space-x-2 py-4">
+            <div className="flex items-center justify-end space-x-4 py-4">
+                <div className="text-sm text-muted-foreground">
+                    {rowsShownString}
+                </div>
                 <div className="space-x-2">
                     <Button
                         variant="outline"
