@@ -15,8 +15,7 @@ export function Navbar() {
         <div>
             <NavLink icon={EnvelopeOpenIcon} label="Входящие" href="/inbox" />
             <NavLink icon={PaperPlaneIcon} label="Отправленные" href="/sent" />
-            <NavLink icon={FileTextIcon} label="Черновики" href="/drafts" />
-            <NavLink icon={TrashIcon} label="Спам" href="/spam" />
+            <NavLink icon={TrashIcon} label="Корзина" href="/trash" />
         </div>
     );
 }

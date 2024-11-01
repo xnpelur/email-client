@@ -1,6 +1,12 @@
 export type Email = {
-    from: string;
-    to: string;
-    title: string;
+    from: {
+        name: string;
+        address: string;
+    };
+    to: {
+        name: string;
+        address: string;
+    };
+    subject: string;
     date: Date;
 };
