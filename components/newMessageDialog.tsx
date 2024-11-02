@@ -29,24 +29,20 @@ export default function NewMessageDialog() {
                         <h3 className="font-semibold">Новое сообщение</h3>
                     </div>
 
-                    <div className="flex-grow space-y-4 overflow-auto p-4">
-                        <div>
-                            <Input
-                                type="email"
-                                placeholder="Кому"
-                                className="rounded-none border-0 border-b px-0 focus-visible:ring-0"
-                            />
-                        </div>
-                        <div>
-                            <Input
-                                type="text"
-                                placeholder="Тема"
-                                className="rounded-none border-0 border-b px-0 focus-visible:ring-0"
-                            />
-                        </div>
+                    <div className="flex-grow overflow-auto px-4 py-1">
+                        <Input
+                            type="email"
+                            placeholder="Кому"
+                            className="rounded-none border-0 border-b px-0 py-3 focus-visible:ring-0 focus-visible:ring-offset-0"
+                        />
+                        <Input
+                            type="text"
+                            placeholder="Тема"
+                            className="rounded-none border-0 border-b px-0 py-3 focus-visible:ring-0 focus-visible:ring-offset-0"
+                        />
                         <Textarea
                             placeholder="Ваше сообщение..."
-                            className="min-h-[300px] resize-none border-0 px-0 focus-visible:ring-0"
+                            className="min-h-[300px] resize-none border-0 px-0 py-3 focus-visible:ring-0 focus-visible:ring-offset-0"
                         />
                     </div>
 
