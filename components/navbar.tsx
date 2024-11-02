@@ -3,7 +3,6 @@
 import { cn } from "@/lib/utils";
 import {
     EnvelopeOpenIcon,
-    FileTextIcon,
     PaperPlaneIcon,
     TrashIcon,
 } from "@radix-ui/react-icons";

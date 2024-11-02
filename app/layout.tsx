@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Navbar } from "@/components/navbar";
+import NewMessageDialog from "@/components/newMessageDialog";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,9 +27,7 @@ export default function RootLayout({
                             My Mail
                         </span>
                     </div>
-                    <Button className="w-full bg-violet-500">
-                        Новое сообщение
-                    </Button>
+                    <NewMessageDialog />
                     <Navbar />
                 </aside>
                 <main className="h-full w-10 flex-1">{children}</main>
