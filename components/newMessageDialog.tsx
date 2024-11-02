@@ -21,7 +21,7 @@ export default function NewMessageDialog() {
                 </Button>
             </DialogTrigger>
             <DialogContent
-                className="fixed bottom-4 left-auto right-4 top-auto w-[500px] max-w-[calc(100vw-2rem)] translate-x-0 translate-y-0 p-0 shadow-xl data-[state=open]:duration-0"
+                className="fixed bottom-4 left-auto right-4 top-auto w-[500px] max-w-[calc(100vw-2rem)] translate-x-0 translate-y-0 p-0 shadow-xl data-[state=closed]:duration-0 data-[state=open]:duration-0"
                 backgroundOpacity={0}
             >
                 <div className="flex h-full flex-col">
