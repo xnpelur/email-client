@@ -3,10 +3,24 @@ import { Email } from "@/types/email";
 import { formatRelative } from "date-fns";
 import { ru } from "date-fns/locale";
 
-export const getEmailColumns = (): ColumnDef<Email>[] => [
+export const getEmailColumns = (
+    currentUserAddress: string,
+): ColumnDef<Email>[] => [
     {
         accessorKey: "contact",
-        cell: ({ row }) => <div>TODO</div>,
+        cell: ({ row }) => {
+            const from = row.original.from;
+            const to = row.original.to;
+
+            const contact = from.address === currentUserAddress ? to : from;
+
+            return (
+                <div>
+                    {contact.name.length > 0 ? contact.name : contact.address}
+                </div>
+            );
+        },
+        size: 250,
     },
     {
         accessorKey: "subject",
@@ -21,5 +35,6 @@ export const getEmailColumns = (): ColumnDef<Email>[] => [
                 })}
             </div>
         ),
+        size: 175,
     },
 ];

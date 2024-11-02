@@ -30,22 +30,23 @@ export function getEmails(mailboxPath: string): Promise<Email[]> {
 
                         stream.once("end", () => {
                             const header = Imap.parseHeader(buffer);
-                            const from = header.from?.[0].match(
-                                /(?:"([^"]*)")?\s*(?:<(.+)>)?/,
-                            );
-                            const to = header.to?.[0].match(
-                                /(?:"([^"]*)")?\s*(?:<(.+)>)?/,
-                            );
+
+                            const from = header.from?.[0];
+                            const to = header.to?.[0];
+
+                            // Parses string formatted like "Name <email@example.com>"
+                            const fromMatch = from.match(/^(.*?)\s<(.+)>$/);
+                            const fromName = fromMatch?.[1] || "";
+                            const fromEmail = fromMatch?.[2] || "";
 
                             emails.push({
                                 from: {
-                                    name: from?.[1] || "",
-                                    address:
-                                        from?.[2] || header.from?.[0] || "",
+                                    name: fromName,
+                                    address: fromEmail,
                                 },
                                 to: {
-                                    name: to?.[1] || "",
-                                    address: to?.[2] || header.to?.[0] || "",
+                                    name: "",
+                                    address: to,
                                 },
                                 subject: header.subject?.[0] || "",
                                 date: new Date(header.date?.[0] || ""),

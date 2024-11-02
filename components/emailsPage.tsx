@@ -18,12 +18,16 @@ import { Email } from "@/types/email";
 import { useMemo, useState } from "react";
 
 type Props = {
+    user: {
+        name: string;
+        address: string;
+    };
     emails: Email[];
     title: string;
 };
 
 export default function EmailsPage(props: Props) {
-    const columns = getEmailColumns();
+    const columns = getEmailColumns(props.user.address);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
     const table = useReactTable({
@@ -57,12 +61,12 @@ export default function EmailsPage(props: Props) {
                     placeholder="Поиск..."
                     value={
                         (table
-                            .getColumn("email")
+                            .getColumn("subject")
                             ?.getFilterValue() as string) ?? ""
                     }
                     onChange={(event) =>
                         table
-                            .getColumn("email")
+                            .getColumn("subject")
                             ?.setFilterValue(event.target.value)
                     }
                     className="max-w-lg"
@@ -81,7 +85,14 @@ export default function EmailsPage(props: Props) {
                                     }
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
+                                        <TableCell
+                                            key={cell.id}
+                                            width={
+                                                cell.column.getSize() !== 150
+                                                    ? cell.column.getSize()
+                                                    : "auto"
+                                            }
+                                        >
                                             {flexRender(
                                                 cell.column.columnDef.cell,
                                                 cell.getContext(),
