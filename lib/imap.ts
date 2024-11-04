@@ -4,8 +4,8 @@ import Imap from "imap";
 const client = new Imap({
     user: process.env.EMAIL_ADDRESS!,
     password: process.env.EMAIL_PASSWORD!,
-    host: process.env.EMAIL_HOST!,
-    port: 993,
+    host: process.env.IMAP_HOST!,
+    port: parseInt(process.env.IMAP_PORT!),
     tls: true,
 });
 

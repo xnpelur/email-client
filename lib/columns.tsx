@@ -35,6 +35,6 @@ export const getEmailColumns = (
                 })}
             </div>
         ),
-        size: 175,
+        size: 225,
     },
 ];
