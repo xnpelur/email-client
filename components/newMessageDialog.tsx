@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Send, Trash2 } from "lucide-react";
+import { Send, Trash2, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -62,12 +62,32 @@ export default function NewMessageDialog() {
                             className="rounded-none border-0 border-b px-0 py-3 focus-visible:ring-0 focus-visible:ring-offset-0"
                             required
                         />
-                        <Textarea
-                            name="text"
-                            placeholder="Ваше сообщение..."
-                            className="min-h-[300px] resize-none border-0 px-0 py-3 focus-visible:ring-0 focus-visible:ring-offset-0"
-                            required
-                        />
+                        <div className="flex min-h-[300px] flex-col gap-2 pb-2">
+                            <Textarea
+                                name="text"
+                                placeholder="Ваше сообщение..."
+                                className="flex-1 resize-none border-0 px-0 py-3 focus-visible:ring-0 focus-visible:ring-offset-0"
+                                required
+                            />
+                            <div className="space-y-1">
+                                {files.map((file, index) => (
+                                    <div
+                                        key={index}
+                                        className="flex items-center justify-between rounded-md bg-slate-200 px-2 py-1"
+                                    >
+                                        <span className="truncate text-sm">
+                                            {file.name}
+                                        </span>
+                                        <Button
+                                            variant="ghost"
+                                            className="h-5 w-5 p-0"
+                                        >
+                                            <XIcon className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     </div>
 
                     <div className="mt-auto flex items-center justify-between border-t p-3">
