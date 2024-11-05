@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useRef } from "react";
 
 interface FilePickerProps {
-    onFilesSelected: (files: FileList) => void;
+    onFilesSelected: (files: File[]) => void;
 }
 
 export function FilePicker({ onFilesSelected }: FilePickerProps) {
@@ -13,8 +13,7 @@ export function FilePicker({ onFilesSelected }: FilePickerProps) {
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
         if (files) {
-            onFilesSelected(files);
-            console.log(files);
+            onFilesSelected(Array.from(files));
         }
     };
 
@@ -34,6 +33,7 @@ export function FilePicker({ onFilesSelected }: FilePickerProps) {
                 className="hidden"
                 onChange={handleFileChange}
                 multiple
+                name="files"
             />
         </>
     );

@@ -12,14 +12,10 @@ import { FilePicker } from "@/components/filePicker";
 export default function NewMessageDialog() {
     const [isOpen, setIsOpen] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
-    const [files, setFiles] = useState<FileList | null>(null);
+    const [files, setFiles] = useState<File[]>([]);
 
     const handleSubmit = async (formData: FormData) => {
-        const receiver = formData.get("receiver") as string;
-        const subject = formData.get("subject") as string;
-        const text = formData.get("text") as string;
-
-        const success = await sendEmail(receiver, subject, text);
+        const success = await sendEmail(formData);
         if (success) {
             setIsOpen(false);
             formRef.current?.reset();
