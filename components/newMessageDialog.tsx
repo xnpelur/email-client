@@ -7,10 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { sendEmail } from "@/lib/smtp";
+import { FilePicker } from "@/components/filePicker";
 
 export default function NewMessageDialog() {
     const [isOpen, setIsOpen] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
+    const [files, setFiles] = useState<FileList | null>(null);
 
     const handleSubmit = async (formData: FormData) => {
         const receiver = formData.get("receiver") as string;
@@ -73,13 +75,16 @@ export default function NewMessageDialog() {
                     </div>
 
                     <div className="mt-auto flex items-center justify-between border-t p-3">
-                        <Button
-                            type="submit"
-                            className="bg-violet-600 hover:bg-violet-700"
-                        >
-                            <Send className="mr-2 h-4 w-4" />
-                            Отправить
-                        </Button>
+                        <div className="space-x-2">
+                            <Button
+                                type="submit"
+                                className="bg-violet-600 hover:bg-violet-700"
+                            >
+                                <Send className="mr-2 h-4 w-4" />
+                                Отправить
+                            </Button>
+                            <FilePicker onFilesSelected={setFiles} />
+                        </div>
                         <Button
                             type="button"
                             variant="ghost"
