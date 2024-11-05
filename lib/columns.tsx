@@ -1,7 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Email } from "@/types/email";
-import { formatRelative } from "date-fns";
-import { ru } from "date-fns/locale";
 
 export const getEmailColumns = (
     currentUserAddress: string,
@@ -28,13 +26,27 @@ export const getEmailColumns = (
     },
     {
         accessorKey: "date",
-        cell: ({ row }) => (
-            <div className="text-right">
-                {formatRelative(row.getValue("date"), new Date(), {
-                    locale: ru,
-                })}
-            </div>
-        ),
-        size: 225,
+        cell: ({ row }) => {
+            const date = row.getValue("date") as Date;
+            const now = new Date();
+            const isToday = date.toDateString() === now.toDateString();
+
+            const dateString = isToday
+                ? date.toLocaleTimeString("ru", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                  })
+                : date.toLocaleDateString("ru", {
+                      day: "numeric",
+                      month: "short",
+                  });
+
+            return (
+                <div className="flex items-center justify-end">
+                    <span className="text-muted-foreground">{dateString}</span>
+                </div>
+            );
+        },
+        size: 100,
     },
 ];
