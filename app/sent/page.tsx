@@ -1,6 +1,6 @@
 import EmailsPage from "@/components/emailsPage";
-import { getSentEmails } from "@/lib/email";
-import { getCurrentUser } from "@/lib/user";
+import { getSentEmails } from "@/data/email";
+import { getCurrentUser } from "@/data/user";
 
 export default async function SentPage() {
     const emails = await getSentEmails();

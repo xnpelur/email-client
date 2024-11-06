@@ -1,6 +1,6 @@
 import EmailsPage from "@/components/emailsPage";
-import { getTrashEmails } from "@/lib/email";
-import { getCurrentUser } from "@/lib/user";
+import { getTrashEmails } from "@/data/email";
+import { getCurrentUser } from "@/data/user";
 
 export default async function TrashPage() {
     const emails = await getTrashEmails();
