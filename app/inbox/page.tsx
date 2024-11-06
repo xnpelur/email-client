@@ -1,9 +1,9 @@
 import EmailsPage from "@/components/emailsPage";
-import { getEmails } from "@/lib/imap";
+import { getInboxEmails } from "@/lib/email";
 import { getCurrentUser } from "@/lib/user";
 
 export default async function InboxPage() {
-    const emails = await getEmails("INBOX");
+    const emails = await getInboxEmails();
 
     return (
         <EmailsPage emails={emails} title="Входящие" user={getCurrentUser()} />

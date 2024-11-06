@@ -1,13 +1,9 @@
 "use server";
 
 import nodemailer from "nodemailer";
+import { Email } from "@/types/email";
 
-export async function sendEmail(formData: FormData): Promise<boolean> {
-    const receiver = formData.get("receiver") as string;
-    const subject = formData.get("subject") as string;
-    const text = formData.get("text") as string;
-    const files = formData.getAll("files") as File[];
-
+export async function sendEmail(email: Email): Promise<boolean> {
     const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST!,
         port: parseInt(process.env.SMTP_PORT!),
@@ -20,16 +16,9 @@ export async function sendEmail(formData: FormData): Promise<boolean> {
 
     transporter.sendMail(
         {
-            from: process.env.EMAIL_ADDRESS,
-            to: receiver,
-            subject,
-            text,
-            attachments: await Promise.all(
-                files.map(async (file) => ({
-                    filename: file.name,
-                    content: Buffer.from(await file.arrayBuffer()),
-                })),
-            ),
+            ...email,
+            from: email.from.address,
+            to: email.to.address,
         },
         (error, info) => {
             if (error) {

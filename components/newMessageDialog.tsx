@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { sendEmail } from "@/lib/smtp";
+import { sendEmail } from "@/lib/email";
 import { FilePicker } from "@/components/filePicker";
 
 export default function NewMessageDialog() {

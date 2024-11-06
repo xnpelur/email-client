@@ -9,4 +9,9 @@ export type Email = {
     };
     subject: string;
     date: Date;
+    text: string;
+    attachments: {
+        filename: string;
+        content: Buffer;
+    }[];
 };

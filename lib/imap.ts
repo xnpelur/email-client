@@ -50,6 +50,8 @@ export function getEmails(mailboxPath: string): Promise<Email[]> {
                                 },
                                 subject: header.subject?.[0] || "",
                                 date: new Date(header.date?.[0] || ""),
+                                text: "",
+                                attachments: [],
                             });
                         });
                     });

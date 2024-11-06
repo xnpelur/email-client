@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import {
     EnvelopeOpenIcon,
+    FileIcon,
     PaperPlaneIcon,
     TrashIcon,
 } from "@radix-ui/react-icons";
@@ -14,6 +15,7 @@ export function Navbar() {
         <div>
             <NavLink icon={EnvelopeOpenIcon} label="Входящие" href="/inbox" />
             <NavLink icon={PaperPlaneIcon} label="Отправленные" href="/sent" />
+            <NavLink icon={FileIcon} label="Черновики" href="/drafts" />
             <NavLink icon={TrashIcon} label="Корзина" href="/trash" />
         </div>
     );
