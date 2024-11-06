@@ -1,5 +1,6 @@
 import { Email } from "@/types/email";
 import Imap from "imap";
+import { parseContact } from "./utils";
 
 const client = new Imap({
     user: process.env.EMAIL_ADDRESS!,
@@ -34,20 +35,9 @@ export function getEmails(mailboxPath: string): Promise<Email[]> {
                             const from = header.from?.[0];
                             const to = header.to?.[0];
 
-                            // Parses string formatted like "Name <email@example.com>"
-                            const fromMatch = from.match(/^(.*?)\s<(.+)>$/);
-                            const fromName = fromMatch?.[1] || "";
-                            const fromEmail = fromMatch?.[2] || "";
-
                             emails.push({
-                                from: {
-                                    name: fromName,
-                                    address: fromEmail,
-                                },
-                                to: {
-                                    name: "",
-                                    address: to,
-                                },
+                                from: parseContact(from),
+                                to: parseContact(to),
                                 subject: header.subject?.[0] || "",
                                 date: new Date(header.date?.[0] || ""),
                                 text: "",
@@ -60,6 +50,68 @@ export function getEmails(mailboxPath: string): Promise<Email[]> {
                 fetch.once("end", () => {
                     client.end();
                     resolve(emails.reverse());
+                });
+            });
+        });
+
+        client.once("error", (err: any) => {
+            reject(err);
+        });
+
+        client.connect();
+    });
+}
+
+export function saveToFolder(
+    email: Email,
+    folder: string,
+    flags: string[],
+): Promise<void> {
+    return new Promise((resolve, reject) => {
+        client.once("ready", () => {
+            client.openBox(folder, true, (err, box) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+
+                const message = [
+                    email.from.name.length > 0
+                        ? `From: ${email.from.name} <${email.from.address}>`
+                        : `From: ${email.from.address}`,
+                    email.to.name.length > 0
+                        ? `To: ${email.to.name} <${email.to.address}>`
+                        : `To: ${email.to.address}`,
+                    `Subject: ${email.subject}`,
+                    `Date: ${email.date.toUTCString()}`,
+                    `Content-Type: multipart/mixed; boundary="boundary"`,
+                    "",
+                    "--boundary",
+                    "Content-Type: text/plain; charset=utf-8",
+                    "",
+                    email.text,
+                    ...email.attachments.map((attachment) =>
+                        [
+                            "",
+                            "--boundary",
+                            `Content-Type: application/octet-stream; name="${attachment.filename}"`,
+                            "Content-Transfer-Encoding: base64",
+                            `Content-Disposition: attachment; filename="${attachment.filename}"`,
+                            "",
+                            attachment.content.toString("base64"),
+                        ].join("\r\n"),
+                    ),
+                    "",
+                    "--boundary--",
+                ].join("\r\n");
+
+                client.append(message, { mailbox: box.name, flags }, (err) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve();
+                    }
+                    client.end();
                 });
             });
         });

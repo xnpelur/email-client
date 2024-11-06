@@ -42,5 +42,11 @@ export async function sendEmail(formData: FormData): Promise<boolean> {
         ),
     };
 
-    return smtp.sendEmail(email);
+    const success = await smtp.sendEmail(email);
+
+    if (success) {
+        await imap.saveToFolder(email, "Отправленные", ["\\Seen"]);
+    }
+
+    return success;
 }
