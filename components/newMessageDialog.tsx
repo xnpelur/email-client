@@ -15,7 +15,12 @@ export default function NewMessageDialog() {
     const [files, setFiles] = useState<File[]>([]);
 
     const handleSubmit = async (formData: FormData) => {
+        files.forEach((file) => {
+            formData.append("files", file);
+        });
+
         const success = await sendEmail(formData);
+
         if (success) {
             setIsOpen(false);
             formRef.current?.reset();
@@ -81,6 +86,13 @@ export default function NewMessageDialog() {
                                         <Button
                                             variant="ghost"
                                             className="h-5 w-5 p-0"
+                                            onClick={() =>
+                                                setFiles(
+                                                    files.filter(
+                                                        (_, i) => i !== index,
+                                                    ),
+                                                )
+                                            }
                                         >
                                             <XIcon className="h-4 w-4" />
                                         </Button>
@@ -99,7 +111,7 @@ export default function NewMessageDialog() {
                                 <Send className="mr-2 h-4 w-4" />
                                 Отправить
                             </Button>
-                            <FilePicker onFilesSelected={setFiles} />
+                            <FilePicker files={files} setFiles={setFiles} />
                         </div>
                         <Button
                             type="button"
