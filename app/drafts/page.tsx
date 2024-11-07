@@ -6,6 +6,11 @@ export default async function DraftsPage() {
     const emails = await getDraftEmails();
 
     return (
-        <EmailsPage emails={emails} title="Черновики" user={getCurrentUser()} />
+        <EmailsPage
+            emails={emails}
+            title="Черновики"
+            user={getCurrentUser()}
+            url="/drafts"
+        />
     );
 }

@@ -10,6 +10,7 @@ export default async function SentPage() {
             emails={emails}
             title="Отправленные"
             user={getCurrentUser()}
+            url="/sent"
         />
     );
 }

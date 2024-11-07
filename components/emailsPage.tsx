@@ -16,6 +16,7 @@ import { CaretLeftIcon, CaretRightIcon } from "@radix-ui/react-icons";
 import { getEmailColumns } from "@/lib/columns";
 import { Email } from "@/types/email";
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type Props = {
     user: {
@@ -24,11 +25,14 @@ type Props = {
     };
     emails: Email[];
     title: string;
+    url: string;
 };
 
 export default function EmailsPage(props: Props) {
     const columns = getEmailColumns(props.user.address);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+    const router = useRouter();
 
     const table = useReactTable({
         data: props.emails,
@@ -80,9 +84,15 @@ export default function EmailsPage(props: Props) {
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
+                                    className="cursor-pointer"
                                     data-state={
                                         row.getIsSelected() && "selected"
                                     }
+                                    onClick={() => {
+                                        router.push(
+                                            `${props.url}/${row.original.seqNo}`,
+                                        );
+                                    }}
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell

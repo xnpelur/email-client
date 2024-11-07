@@ -6,6 +6,11 @@ export default async function InboxPage() {
     const emails = await getInboxEmails();
 
     return (
-        <EmailsPage emails={emails} title="Входящие" user={getCurrentUser()} />
+        <EmailsPage
+            emails={emails}
+            title="Входящие"
+            user={getCurrentUser()}
+            url="/inbox"
+        />
     );
 }

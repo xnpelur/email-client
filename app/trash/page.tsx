@@ -6,6 +6,11 @@ export default async function TrashPage() {
     const emails = await getTrashEmails();
 
     return (
-        <EmailsPage emails={emails} title="Корзина" user={getCurrentUser()} />
+        <EmailsPage
+            emails={emails}
+            title="Корзина"
+            user={getCurrentUser()}
+            url="/trash"
+        />
     );
 }
