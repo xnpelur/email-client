@@ -1,4 +1,5 @@
 export type Email = {
+    seqNo: number;
     from: {
         name: string;
         address: string;

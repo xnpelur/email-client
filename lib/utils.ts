@@ -17,3 +17,25 @@ export function parseContact(contact: string) {
 
     return { name, address };
 }
+
+export function parsePlainTextBody(body: string): string {
+    const boundaryMatch = body.match(/--(.+?)\r\n/);
+    if (!boundaryMatch) return "";
+
+    const boundary = boundaryMatch[1];
+    const parts = body.split(`--${boundary}`).map((part) => part.trim());
+
+    for (const part of parts) {
+        if (part.startsWith("Content-Type: text/plain")) {
+            const content = part.split(
+                "Content-Transfer-Encoding: base64\r\n\r\n",
+            )[1];
+
+            if (content) {
+                return Buffer.from(content, "base64").toString("utf8");
+            }
+        }
+    }
+
+    return "";
+}

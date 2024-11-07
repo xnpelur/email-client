@@ -1,6 +1,6 @@
 import { Email } from "@/types/email";
 import Imap from "imap";
-import { parseContact } from "./utils";
+import { parseContact, parsePlainTextBody } from "./utils";
 
 const client = new Imap({
     user: process.env.EMAIL_ADDRESS!,
@@ -22,7 +22,7 @@ export function getEmails(mailboxPath: string): Promise<Email[]> {
                     bodies: ["HEADER.FIELDS (FROM TO SUBJECT DATE)"],
                 });
 
-                fetch.on("message", (msg) => {
+                fetch.on("message", (msg, seqNo) => {
                     msg.on("body", (stream) => {
                         let buffer = "";
                         stream.on("data", (chunk) => {
@@ -36,6 +36,7 @@ export function getEmails(mailboxPath: string): Promise<Email[]> {
                             const to = header.to?.[0];
 
                             emails.push({
+                                seqNo,
                                 from: parseContact(from),
                                 to: parseContact(to),
                                 subject: header.subject?.[0] || "",
@@ -111,6 +112,94 @@ export function saveToFolder(
                     } else {
                         resolve();
                     }
+                    client.end();
+                });
+            });
+        });
+
+        client.once("error", (err: any) => {
+            reject(err);
+        });
+
+        client.connect();
+    });
+}
+
+export function getEmailBySeqNo(
+    mailboxPath: string,
+    seqNo: number,
+): Promise<Email> {
+    return new Promise((resolve, reject) => {
+        client.once("ready", () => {
+            client.openBox(mailboxPath, false, (err, box) => {
+                if (err) reject(err);
+
+                const fetch = client.seq.fetch(seqNo, {
+                    bodies: ["HEADER.FIELDS (FROM TO SUBJECT DATE)", "TEXT"],
+                    struct: true,
+                });
+
+                fetch.on("message", (msg) => {
+                    let headerBuffer = "";
+                    let textBuffer = "";
+                    let attachments: any[] = [];
+
+                    msg.on("body", (stream, info) => {
+                        let buffer = "";
+                        stream.on("data", (chunk) => {
+                            buffer += chunk.toString("utf8");
+                        });
+
+                        stream.once("end", () => {
+                            if (info.which === "TEXT") {
+                                textBuffer = buffer;
+                            } else {
+                                headerBuffer = buffer;
+                            }
+
+                            if (headerBuffer && textBuffer) {
+                                const header = Imap.parseHeader(headerBuffer);
+
+                                const from = header.from?.[0];
+                                const to = header.to?.[0];
+                                const text = parsePlainTextBody(textBuffer);
+
+                                // Process attachments if any
+                                // msg.on("attributes", (attrs) => {
+                                //     const parts = Imap.parseBodyStructure(
+                                //         attrs.struct,
+                                //     );
+                                //     parts.forEach((part) => {
+                                //         if (
+                                //             part.disposition &&
+                                //             part.disposition.type.toUpperCase() ===
+                                //                 "ATTACHMENT"
+                                //         ) {
+                                //             attachments.push({
+                                //                 filename:
+                                //                     part.disposition.params
+                                //                         .filename,
+                                //                 content: part.body,
+                                //             });
+                                //         }
+                                //     });
+                                // });
+
+                                resolve({
+                                    seqNo,
+                                    from: parseContact(from),
+                                    to: parseContact(to),
+                                    subject: header.subject?.[0] || "",
+                                    date: new Date(header.date?.[0] || ""),
+                                    text,
+                                    attachments,
+                                });
+                            }
+                        });
+                    });
+                });
+
+                fetch.once("end", () => {
                     client.end();
                 });
             });
