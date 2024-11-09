@@ -1,3 +1,4 @@
+import EmailView from "@/components/email-view";
 import { getEmailBySeqNo } from "@/lib/imap";
 
 export default async function EmailPage({
@@ -7,23 +8,5 @@ export default async function EmailPage({
 }) {
     const email = await getEmailBySeqNo("Отправленные", parseInt(params.seqNo));
 
-    return (
-        <div className="p-4">
-            <pre>
-                {JSON.stringify(
-                    {
-                        seqNo: email.seqNo,
-                        from: email.from,
-                        to: email.to,
-                        subject: email.subject,
-                        date: email.date.toISOString(),
-                        text: email.text,
-                        attachments: email.attachments,
-                    },
-                    null,
-                    2,
-                )}
-            </pre>
-        </div>
-    );
+    return <EmailView email={email} />;
 }
