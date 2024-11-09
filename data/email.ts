@@ -29,6 +29,7 @@ export async function sendEmail(formData: FormData): Promise<boolean> {
     const files = formData.getAll("files") as File[];
 
     const email: Email = {
+        seqNo: 0,
         from: { name: "", address: process.env.EMAIL_ADDRESS! },
         to: { name: "", address: receiver },
         subject,
@@ -49,4 +50,12 @@ export async function sendEmail(formData: FormData): Promise<boolean> {
     }
 
     return success;
+}
+
+export async function getEmail(
+    mailbox: string,
+    sequenceNumber: number,
+): Promise<Email> {
+    const email = await imap.getEmailBySeqNo(mailbox, sequenceNumber);
+    return email;
 }
