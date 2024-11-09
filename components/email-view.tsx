@@ -1,7 +1,8 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 import { Email } from "@/types/email";
 import {
     ArrowLeftIcon,
@@ -10,20 +11,31 @@ import {
     TrashIcon,
     UserIcon,
 } from "lucide-react";
+import Link from "next/link";
 
 type Props = {
     email: Email;
+    mailbox: {
+        label: string;
+        url: string;
+    };
 };
 
-export default function EmailView({ email }: Props) {
+export default function EmailView({ email, mailbox }: Props) {
     return (
         <Card className="flex h-full w-full flex-col border-none shadow-none">
             <CardHeader className="flex flex-col space-y-4">
                 <div className="flex items-center justify-between">
-                    <Button variant="ghost" className="gap-2 px-3">
+                    <Link
+                        href={mailbox.url}
+                        className={cn(
+                            buttonVariants({ variant: "ghost" }),
+                            "gap-2 px-3",
+                        )}
+                    >
                         <ArrowLeftIcon className="h-4 w-4" />
-                        <span>Входящие</span>
-                    </Button>
+                        <span>{mailbox.label}</span>
+                    </Link>
                     <div className="flex space-x-2">
                         <Button variant="ghost" size="icon">
                             <TrashIcon className="h-4 w-4" />
