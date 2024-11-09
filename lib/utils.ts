@@ -19,21 +19,48 @@ export function parseContact(contact: string) {
 }
 
 export function parsePlainTextBody(body: string): string {
-    const boundaryMatch = body.match(/--(.+?)\r\n/);
-    if (!boundaryMatch) return "";
+    const lines = body.split("\r\n");
 
-    const boundary = boundaryMatch[1];
-    const parts = body.split(`--${boundary}`).map((part) => part.trim());
+    let contentType = "";
+    let contentTransferEncoding = "";
+    let content = "";
+    let contentFlag = false;
 
-    for (const part of parts) {
-        if (part.startsWith("Content-Type: text/plain")) {
-            const content = part.split(
-                "Content-Transfer-Encoding: base64\r\n\r\n",
-            )[1];
-
-            if (content) {
-                return Buffer.from(content, "base64").toString("utf8");
+    for (const line of lines) {
+        if (line.startsWith("--")) {
+            if (contentType === "text/plain") {
+                if (contentTransferEncoding === "base64") {
+                    return Buffer.from(content, "base64").toString("utf8");
+                }
+                return content;
             }
+
+            contentType = "";
+            contentTransferEncoding = "";
+            content = "";
+            contentFlag = false;
+            continue;
+        }
+
+        if (contentFlag) {
+            content += line;
+            continue;
+        }
+
+        if (line.length === 0) {
+            contentFlag = true;
+            continue;
+        }
+
+        if (line.startsWith("Content-Type:")) {
+            const s = line.split(";")[0];
+            contentType = s.split(":")[1].trim();
+            continue;
+        }
+
+        if (line.startsWith("Content-Transfer-Encoding:")) {
+            contentTransferEncoding = line.split(":")[1].trim();
+            continue;
         }
     }
 
