@@ -1,4 +1,4 @@
-import EmailsPage from "@/components/emailsPage";
+import EmailsPage from "@/components/emails-page";
 import { getDraftEmails } from "@/data/email";
 import { getCurrentUser } from "@/data/user";
 

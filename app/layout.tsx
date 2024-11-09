@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-import { Button } from "@/components/ui/button";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Navbar } from "@/components/navbar";
-import NewMessageDialog from "@/components/newMessageDialog";
+import NewEmailDialog from "@/components/new-email-dialog";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,7 +26,7 @@ export default function RootLayout({
                             My Mail
                         </span>
                     </div>
-                    <NewMessageDialog />
+                    <NewEmailDialog />
                     <Navbar />
                 </aside>
                 <main className="h-full w-10 flex-1">{children}</main>

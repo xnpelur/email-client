@@ -7,9 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { sendEmail } from "@/data/email";
-import { FilePicker } from "@/components/filePicker";
+import { FilePicker } from "@/components/file-picker";
 
-export default function NewMessageDialog() {
+export default function NewEmailDialog() {
     const [isOpen, setIsOpen] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
     const [files, setFiles] = useState<File[]>([]);
