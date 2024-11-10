@@ -1,6 +1,6 @@
 import { Email } from "@/types/email";
 import Imap from "imap";
-import { parseContact, parsePlainTextBody } from "./utils";
+import { parseContact, parsePlainTextBody } from "@/lib/parsers";
 
 const client = new Imap({
     user: process.env.EMAIL_ADDRESS!,
