@@ -22,10 +22,9 @@ export async function sendEmail(email: Email): Promise<boolean> {
         },
         (error, info) => {
             if (error) {
-                console.log(`Error: ${error}`);
+                console.error(`Error: ${error}`);
                 return false;
             }
-            console.log(`Email sent: ${info.response}`);
         },
     );
 

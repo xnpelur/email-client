@@ -1,6 +1,6 @@
 import { Email } from "@/types/email";
 import Imap from "imap";
-import { parseContact, parsePlainTextBody } from "@/lib/parsers";
+import { parseContact, parseBody } from "@/lib/parsers";
 
 const client = new Imap({
     user: process.env.EMAIL_ADDRESS!,
@@ -162,28 +162,17 @@ export function getEmailBySeqNo(
 
                                 const from = header.from?.[0];
                                 const to = header.to?.[0];
-                                const text = parsePlainTextBody(textBuffer);
 
-                                // Process attachments if any
-                                // msg.on("attributes", (attrs) => {
-                                //     const parts = Imap.parseBodyStructure(
-                                //         attrs.struct,
-                                //     );
-                                //     parts.forEach((part) => {
-                                //         if (
-                                //             part.disposition &&
-                                //             part.disposition.type.toUpperCase() ===
-                                //                 "ATTACHMENT"
-                                //         ) {
-                                //             attachments.push({
-                                //                 filename:
-                                //                     part.disposition.params
-                                //                         .filename,
-                                //                 content: part.body,
-                                //             });
-                                //         }
-                                //     });
-                                // });
+                                const bodyParts = parseBody(textBuffer);
+                                const text =
+                                    bodyParts.find((p) => p.type === "plain")
+                                        ?.content || "";
+                                const attachments = bodyParts
+                                    .filter((p) => p.type === "attachment")
+                                    .map((p) => ({
+                                        filename: p.filename!,
+                                        content: Buffer.from(p.content),
+                                    }));
 
                                 resolve({
                                     seqNo,
