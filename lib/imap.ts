@@ -142,7 +142,6 @@ export function getEmailBySeqNo(
                 fetch.on("message", (msg) => {
                     let headerBuffer = "";
                     let textBuffer = "";
-                    let attachments: any[] = [];
 
                     msg.on("body", (stream, info) => {
                         let buffer = "";
@@ -163,16 +162,7 @@ export function getEmailBySeqNo(
                                 const from = header.from?.[0];
                                 const to = header.to?.[0];
 
-                                const bodyParts = parseBody(textBuffer);
-                                const text =
-                                    bodyParts.find((p) => p.type === "plain")
-                                        ?.content || "";
-                                const attachments = bodyParts
-                                    .filter((p) => p.type === "attachment")
-                                    .map((p) => ({
-                                        filename: p.filename!,
-                                        content: Buffer.from(p.content),
-                                    }));
+                                const bodyParseResult = parseBody(textBuffer);
 
                                 resolve({
                                     seqNo,
@@ -180,8 +170,8 @@ export function getEmailBySeqNo(
                                     to: parseContact(to),
                                     subject: header.subject?.[0] || "",
                                     date: new Date(header.date?.[0] || ""),
-                                    text,
-                                    attachments,
+                                    text: bodyParseResult.plain,
+                                    attachments: bodyParseResult.attachments,
                                 });
                             }
                         });

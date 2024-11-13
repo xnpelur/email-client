@@ -3,10 +3,15 @@ type Contact = {
     address: string;
 };
 
-type BodyPart = {
-    type: "plain" | "html" | "attachment";
-    content: string;
-    filename?: string;
+type BodyParseResult = {
+    plain: string;
+    html: string;
+    attachments: Attachment[];
+};
+
+type Attachment = {
+    content: Buffer;
+    filename: string;
 };
 
 type BodyParseState = {
@@ -31,20 +36,22 @@ export function parseContact(contact: string): Contact {
     return { name, address };
 }
 
-export function parseBody(body: string): BodyPart[] {
+export function parseBody(body: string): BodyParseResult {
     const lines = body.trim().split("\r\n");
     const finalState = lines.reduce(parseLine, []);
-    const bodyParts: BodyPart[] = [];
+    const result: BodyParseResult = {
+        plain: "",
+        html: "",
+        attachments: [],
+    };
 
     for (const part of finalState) {
         if (part.contentDisposition === "attachment") {
             if (part.contentTransferEncoding === "base64") {
-                const content = decodeBase64(part.content);
                 const filename = decodeBase64Mime(part.filename);
 
-                bodyParts.push({
-                    type: "attachment",
-                    content,
+                result.attachments.push({
+                    content: Buffer.from(part.content, "base64"),
                     filename,
                 });
             }
@@ -54,18 +61,18 @@ export function parseBody(body: string): BodyPart[] {
                     ? decodeBase64(part.content)
                     : part.content;
 
-            bodyParts.push({ type: "plain", content });
+            result.plain = content;
         } else if (part.contentType === "text/html") {
             const content =
                 part.contentTransferEncoding === "base64"
                     ? decodeBase64(part.content)
                     : part.content;
 
-            bodyParts.push({ type: "html", content });
+            result.html = content;
         }
     }
 
-    return bodyParts;
+    return result;
 }
 
 function parseLine(state: BodyParseState[], line: string): BodyParseState[] {

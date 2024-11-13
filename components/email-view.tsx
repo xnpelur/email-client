@@ -12,6 +12,7 @@ import {
     UserIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { AttachmentView } from "./attachments-view";
 
 type Props = {
     email: Email;
@@ -86,32 +87,14 @@ export default function EmailView({ email, mailbox }: Props) {
                             Прикрепленные файлы
                         </p>
                         {email.attachments.map((attachment, index) => (
-                            <div
+                            <AttachmentView
                                 key={index}
-                                className="mt-2 flex items-center space-x-2"
-                            >
-                                <div className="rounded bg-background p-2">
-                                    <svg
-                                        className="h-6 w-6 text-muted-foreground"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                                        />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium">
-                                        {attachment.filename}
-                                    </p>
-                                </div>
-                            </div>
+                                attachment={{
+                                    filename: attachment.filename,
+                                    contentBase64:
+                                        attachment.content.toString("base64"),
+                                }}
+                            />
                         ))}
                     </div>
                 )}
