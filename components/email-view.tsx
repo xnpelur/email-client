@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
+import { cn, getMailboxLabel } from "@/lib/utils";
 import { Email } from "@/types/email";
 import {
     ArrowLeftIcon,
@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { AttachmentView } from "./attachments-view";
+import { DeleteEmailButton } from "./delete-email-button";
 
 type Props = {
     email: Email;
@@ -38,10 +39,10 @@ export default function EmailView({ email, mailbox }: Props) {
                         <span>{mailbox.label}</span>
                     </Link>
                     <div className="flex space-x-2">
-                        <Button variant="ghost" size="icon">
-                            <TrashIcon className="h-4 w-4" />
-                            <span className="sr-only">Delete</span>
-                        </Button>
+                        <DeleteEmailButton
+                            mailbox={getMailboxLabel(mailbox.url)}
+                            sequenceNumber={email.seqNo}
+                        />
                     </div>
                 </div>
                 <div className="flex items-start space-x-4">

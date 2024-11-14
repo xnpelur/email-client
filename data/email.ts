@@ -15,11 +15,13 @@ export async function getSentEmails(): Promise<Email[]> {
 }
 
 export async function getDraftEmails(): Promise<Email[]> {
-    return [];
+    const emails = await imap.getEmails("Черновики");
+    return emails;
 }
 
 export async function getTrashEmails(): Promise<Email[]> {
-    return [];
+    const emails = await imap.getEmails("Корзина");
+    return emails;
 }
 
 export async function sendEmail(formData: FormData): Promise<boolean> {
@@ -46,7 +48,7 @@ export async function sendEmail(formData: FormData): Promise<boolean> {
     const success = await smtp.sendEmail(email);
 
     if (success) {
-        await imap.saveToFolder(email, "Отправленные", ["\\Seen"]);
+        await imap.saveToMailbox(email, "Отправленные", ["\\Seen"]);
     }
 
     return success;
@@ -58,4 +60,15 @@ export async function getEmail(
 ): Promise<Email> {
     const email = await imap.getEmailBySeqNo(mailbox, sequenceNumber);
     return email;
+}
+
+export async function deleteEmail(
+    mailbox: string,
+    sequenceNumber: number,
+): Promise<void> {
+    if (mailbox !== "Корзина") {
+        const email = await getEmail(mailbox, sequenceNumber);
+        await imap.saveToMailbox(email, "Корзина", ["\\Deleted"]);
+    }
+    await imap.deleteEmail(mailbox, sequenceNumber);
 }

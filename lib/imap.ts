@@ -1,3 +1,5 @@
+"use server";
+
 import { Email } from "@/types/email";
 import Imap from "imap";
 import { parseContact, parseBody } from "@/lib/parsers";
@@ -10,7 +12,7 @@ const client = new Imap({
     tls: true,
 });
 
-export function getEmails(mailboxPath: string): Promise<Email[]> {
+export async function getEmails(mailboxPath: string): Promise<Email[]> {
     return new Promise((resolve, reject) => {
         const emails: Email[] = [];
 
@@ -63,14 +65,14 @@ export function getEmails(mailboxPath: string): Promise<Email[]> {
     });
 }
 
-export function saveToFolder(
+export async function saveToMailbox(
     email: Email,
-    folder: string,
+    mailbox: string,
     flags: string[],
 ): Promise<void> {
     return new Promise((resolve, reject) => {
         client.once("ready", () => {
-            client.openBox(folder, true, (err, box) => {
+            client.openBox(mailbox, true, (err, box) => {
                 if (err) {
                     reject(err);
                     return;
@@ -125,7 +127,7 @@ export function saveToFolder(
     });
 }
 
-export function getEmailBySeqNo(
+export async function getEmailBySeqNo(
     mailboxPath: string,
     seqNo: number,
 ): Promise<Email> {
@@ -180,6 +182,56 @@ export function getEmailBySeqNo(
 
                 fetch.once("end", () => {
                     client.end();
+                });
+            });
+        });
+
+        client.once("error", (err: any) => {
+            reject(err);
+        });
+
+        client.connect();
+    });
+}
+
+export async function deleteEmail(
+    mailbox: string,
+    seqNo: number,
+): Promise<void> {
+    const client = new Imap({
+        user: process.env.EMAIL_ADDRESS!,
+        password: process.env.EMAIL_PASSWORD!,
+        host: process.env.IMAP_HOST!,
+        port: parseInt(process.env.IMAP_PORT!),
+        tls: true,
+    });
+
+    return new Promise((resolve, reject) => {
+        client.once("ready", () => {
+            client.openBox(mailbox, false, (err) => {
+                if (err) {
+                    client.end();
+                    reject(err);
+                    return;
+                }
+
+                client.seq.addFlags(seqNo, "\\Deleted", (err) => {
+                    if (err) {
+                        client.end();
+                        reject(err);
+                        return;
+                    }
+
+                    client.expunge((err) => {
+                        if (err) {
+                            client.end();
+                            reject(err);
+                            return;
+                        }
+
+                        client.end();
+                        resolve();
+                    });
                 });
             });
         });
