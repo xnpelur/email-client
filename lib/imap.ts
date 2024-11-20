@@ -4,15 +4,17 @@ import { Email } from "@/types/email";
 import Imap from "imap";
 import { parseContact, parseBody } from "@/lib/parsers";
 
-const client = new Imap({
+const imapConfig: Imap.Config = {
     user: process.env.EMAIL_ADDRESS!,
     password: process.env.EMAIL_PASSWORD!,
     host: process.env.IMAP_HOST!,
     port: parseInt(process.env.IMAP_PORT!),
     tls: true,
-});
+};
 
 export async function getEmails(mailboxPath: string): Promise<Email[]> {
+    const client = new Imap(imapConfig);
+
     return new Promise((resolve, reject) => {
         const emails: Email[] = [];
 
@@ -70,6 +72,8 @@ export async function saveToMailbox(
     mailbox: string,
     flags: string[],
 ): Promise<void> {
+    const client = new Imap(imapConfig);
+
     return new Promise((resolve, reject) => {
         client.once("ready", () => {
             client.openBox(mailbox, true, (err, box) => {
@@ -131,6 +135,8 @@ export async function getEmailBySeqNo(
     mailboxPath: string,
     seqNo: number,
 ): Promise<Email> {
+    const client = new Imap(imapConfig);
+
     return new Promise((resolve, reject) => {
         client.once("ready", () => {
             client.openBox(mailboxPath, false, (err, box) => {
@@ -198,13 +204,7 @@ export async function deleteEmail(
     mailbox: string,
     seqNo: number,
 ): Promise<void> {
-    const client = new Imap({
-        user: process.env.EMAIL_ADDRESS!,
-        password: process.env.EMAIL_PASSWORD!,
-        host: process.env.IMAP_HOST!,
-        port: parseInt(process.env.IMAP_PORT!),
-        tls: true,
-    });
+    const client = new Imap(imapConfig);
 
     return new Promise((resolve, reject) => {
         client.once("ready", () => {
