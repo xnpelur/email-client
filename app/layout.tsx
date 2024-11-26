@@ -22,7 +22,7 @@ export default function RootLayout({
     return (
         <html>
             <body className={cn(inter.className, "flex bg-slate-100")}>
-                <aside className="flex h-full w-64 flex-col justify-between px-4 py-8">
+                <aside className="flex h-full w-64 flex-col justify-between p-4 pt-8">
                     <div className="space-y-4">
                         <div className="flex h-10 items-center gap-2">
                             <div className="h-6 w-6">
@@ -37,7 +37,7 @@ export default function RootLayout({
                     </div>
                     <Button
                         variant="ghost"
-                        className="flex items-center justify-start hover:bg-slate-200"
+                        className="flex items-center justify-start text-slate-600 hover:bg-slate-200"
                     >
                         <LogOutIcon className="mr-2 h-4 w-4" />
                         Выйти
