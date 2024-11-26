@@ -64,11 +64,10 @@ export async function getEmail(
 
 export async function deleteEmail(
     mailbox: string,
-    sequenceNumber: number,
+    email: Email,
 ): Promise<void> {
     if (mailbox !== "Корзина") {
-        const email = await getEmail(mailbox, sequenceNumber);
-        await imap.saveToMailbox(email, "Корзина", ["\\Deleted"]);
+        await imap.saveToMailbox(email, "Корзина", []);
     }
-    await imap.deleteEmail(mailbox, sequenceNumber);
+    await imap.deleteEmail(mailbox, email.seqNo);
 }

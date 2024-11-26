@@ -123,7 +123,7 @@ export default function EmailsPage(props: Props) {
                         )}
                     </TableBody>
                 </Table>
-                <div className="flex items-center justify-end space-x-4 p-4">
+                <div className="flex items-center justify-between space-x-4 p-4">
                     <div className="text-sm text-muted-foreground">
                         {rowsShownString}
                     </div>

@@ -112,7 +112,7 @@ export async function saveToMailbox(
                     "--boundary--",
                 ].join("\r\n");
 
-                client.append(message, { mailbox: box.name, flags }, (err) => {
+                client.append(message, { mailbox, flags }, (err) => {
                     if (err) {
                         reject(err);
                     } else {

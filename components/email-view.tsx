@@ -36,7 +36,7 @@ export default function EmailView({ email, mailbox }: Props) {
                         <div className="flex space-x-2">
                             <DeleteEmailButton
                                 mailbox={getMailboxLabel(mailbox.url)}
-                                sequenceNumber={email.seqNo}
+                                email={email}
                             />
                         </div>
                     </div>

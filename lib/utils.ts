@@ -8,7 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 export function getMailboxLabel(mailboxUrl: string): string {
     switch (mailboxUrl) {
         case "/inbox":
-            return "Входящие";
+            return "INBOX";
         case "/sent":
             return "Отправленные";
         case "/trash":
