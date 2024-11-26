@@ -33,7 +33,7 @@ export default function NewEmailDialog() {
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 <Button
-                    className="w-full bg-violet-500"
+                    className="w-full bg-slate-600 hover:bg-slate-700"
                     onClick={() => setIsOpen(true)}
                 >
                     Новое сообщение
@@ -48,7 +48,7 @@ export default function NewEmailDialog() {
                     action={handleSubmit}
                     className="flex h-full flex-col"
                 >
-                    <div className="flex items-center justify-between bg-violet-100 p-3">
+                    <div className="flex items-center justify-between bg-slate-100 p-3">
                         <h3 className="font-semibold">Новое сообщение</h3>
                     </div>
 
@@ -106,7 +106,7 @@ export default function NewEmailDialog() {
                         <div className="space-x-2">
                             <Button
                                 type="submit"
-                                className="bg-violet-600 hover:bg-violet-700"
+                                className="bg-slate-600 hover:bg-slate-700"
                             >
                                 <Send className="mr-2 h-4 w-4" />
                                 Отправить

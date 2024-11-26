@@ -35,13 +35,13 @@ function NavLink({
         <Link
             className={cn(
                 "flex select-none items-center rounded-md px-3 py-2.5",
-                "leading-none text-white no-underline outline-none transition-colors",
-                "hover:bg-accent hover:text-accent-foreground",
-                href === pathname ? "bg-accent/10 font-bold" : "",
+                "leading-none text-slate-600 no-underline outline-none transition-colors",
+                "hover:bg-slate-200 hover:text-accent-foreground",
+                href === pathname ? "bg-slate-200 font-bold" : "",
             )}
             href={href}
         >
-            <Icon className="mr-2 h-4 w-4" />
+            <Icon className="mr-2 h-4 w-4 text-slate-600" />
             <span
                 className={cn(
                     "text-sm",

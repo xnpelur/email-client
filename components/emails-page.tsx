@@ -58,8 +58,8 @@ export default function EmailsPage(props: Props) {
     }, [pageIndex, pageSize, rowsCount]);
 
     return (
-        <div className="w-full px-4">
-            <div className="flex flex-col items-center justify-between py-4 lg:flex-row">
+        <div className="w-full space-y-4 p-4">
+            <div className="flex flex-col items-center justify-between rounded-lg bg-white px-4 py-2 lg:flex-row">
                 <h1 className="flex-1 text-2xl font-semibold">{props.title}</h1>
                 <Input
                     placeholder="Поиск..."
@@ -77,14 +77,14 @@ export default function EmailsPage(props: Props) {
                 />
                 <div className="flex-1"></div>
             </div>
-            <div className="rounded-md border">
+            <div className="rounded-lg bg-white">
                 <Table>
                     <TableBody>
                         {table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
-                                    className="cursor-pointer"
+                                    className="cursor-pointer border-none"
                                     data-state={
                                         row.getIsSelected() && "selected"
                                     }
@@ -112,7 +112,7 @@ export default function EmailsPage(props: Props) {
                                 </TableRow>
                             ))
                         ) : (
-                            <TableRow>
+                            <TableRow className="border-none">
                                 <TableCell
                                     colSpan={columns.length}
                                     className="h-24 text-center"
@@ -123,28 +123,28 @@ export default function EmailsPage(props: Props) {
                         )}
                     </TableBody>
                 </Table>
-            </div>
-            <div className="flex items-center justify-end space-x-4 py-4">
-                <div className="text-sm text-muted-foreground">
-                    {rowsShownString}
-                </div>
-                <div className="space-x-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
-                    >
-                        <CaretLeftIcon />
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
-                    >
-                        <CaretRightIcon />
-                    </Button>
+                <div className="flex items-center justify-end space-x-4 p-4">
+                    <div className="text-sm text-muted-foreground">
+                        {rowsShownString}
+                    </div>
+                    <div className="space-x-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => table.previousPage()}
+                            disabled={!table.getCanPreviousPage()}
+                        >
+                            <CaretLeftIcon />
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => table.nextPage()}
+                            disabled={!table.getCanNextPage()}
+                        >
+                            <CaretRightIcon />
+                        </Button>
+                    </div>
                 </div>
             </div>
         </div>

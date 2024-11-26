@@ -5,6 +5,8 @@ import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Navbar } from "@/components/navbar";
 import NewEmailDialog from "@/components/new-email-dialog";
+import { LogOutIcon, UserCircleIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,15 +21,27 @@ export default function RootLayout({
 }>) {
     return (
         <html>
-            <body className={cn(inter.className, "flex")}>
-                <aside className="h-full w-64 space-y-4 bg-violet-800 p-4">
-                    <div className="h-10">
-                        <span className="text-2xl font-semibold text-white">
-                            My Mail
-                        </span>
+            <body className={cn(inter.className, "flex bg-slate-100")}>
+                <aside className="flex h-full w-64 flex-col justify-between px-4 py-8">
+                    <div className="space-y-4">
+                        <div className="flex h-10 items-center gap-2">
+                            <div className="h-6 w-6">
+                                <UserCircleIcon className="text-slate-600" />
+                            </div>
+                            <span className="truncate pb-1 text-base font-semibold text-slate-600">
+                                a_bbbbb_c@example.com
+                            </span>
+                        </div>
+                        <NewEmailDialog />
+                        <Navbar />
                     </div>
-                    <NewEmailDialog />
-                    <Navbar />
+                    <Button
+                        variant="ghost"
+                        className="flex items-center justify-start hover:bg-slate-200"
+                    >
+                        <LogOutIcon className="mr-2 h-4 w-4" />
+                        Выйти
+                    </Button>
                 </aside>
                 <main className="h-full w-10 flex-1">{children}</main>
             </body>
