@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { sendEmail } from "@/data/email";
+import { saveDraft, sendEmail } from "@/data/email";
 import { FilePicker } from "@/components/file-picker";
 
 export default function NewEmailDialog() {
@@ -30,7 +30,35 @@ export default function NewEmailDialog() {
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <Dialog
+            open={isOpen}
+            onOpenChange={(value) => {
+                if (!value) {
+                    const formData = new FormData(formRef.current!);
+
+                    const receiver = formData.get("receiver") as string;
+                    const subject = formData.get("subject") as string;
+                    const text = formData.get("text") as string;
+
+                    if (receiver && subject && text) {
+                        const email = {
+                            seqNo: 0,
+                            from: { name: "", address: "me" },
+                            to: {
+                                name: "",
+                                address: formData.get("receiver") as string,
+                            },
+                            subject: formData.get("subject") as string,
+                            date: new Date(),
+                            text: formData.get("text") as string,
+                            attachments: [],
+                        };
+                        saveDraft(email);
+                    }
+                }
+                setIsOpen(value);
+            }}
+        >
             <DialogTrigger asChild>
                 <Button
                     className="w-full bg-slate-600 hover:bg-slate-700"

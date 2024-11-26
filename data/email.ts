@@ -71,3 +71,7 @@ export async function deleteEmail(
     }
     await imap.deleteEmail(mailbox, email.seqNo);
 }
+
+export async function saveDraft(email: Email): Promise<void> {
+    await imap.saveToMailbox(email, "Черновики", []);
+}
