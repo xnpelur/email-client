@@ -24,7 +24,10 @@ export async function getTrashEmails(): Promise<Email[]> {
     return emails;
 }
 
-export async function sendEmail(formData: FormData): Promise<boolean> {
+export async function sendEmail(
+    formData: FormData,
+    draftSeqNo?: number,
+): Promise<boolean> {
     const receiver = formData.get("receiver") as string;
     const subject = formData.get("subject") as string;
     const text = formData.get("text") as string;
@@ -49,6 +52,9 @@ export async function sendEmail(formData: FormData): Promise<boolean> {
 
     if (success) {
         await imap.saveToMailbox(email, "Отправленные", ["\\Seen"]);
+        if (draftSeqNo) {
+            await imap.deleteEmail("Черновики", draftSeqNo);
+        }
     }
 
     return success;

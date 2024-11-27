@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { saveDraft, sendEmail } from "@/data/email";
+import { deleteEmail, saveDraft, sendEmail } from "@/data/email";
 import { FilePicker } from "@/components/file-picker";
 import { Email } from "@/types/email";
+import { useRouter } from "next/navigation";
 
 type Props = {
     email?: Email;
@@ -27,17 +28,21 @@ export default function NewEmailDialog({ email, hideTrigger }: Props) {
                 }),
         );
     });
+    const router = useRouter();
 
     const handleSubmit = async (formData: FormData) => {
         files.forEach((file) => {
             formData.append("files", file);
         });
 
-        const success = await sendEmail(formData);
+        const success = await sendEmail(formData, email?.seqNo);
 
         if (success) {
             setIsOpen(false);
             formRef.current?.reset();
+            if (email) {
+                router.refresh();
+            }
         } else {
             console.error("Failed to send email");
         }
@@ -176,6 +181,10 @@ export default function NewEmailDialog({ email, hideTrigger }: Props) {
                                 formRef.current?.reset();
                                 setFiles([]);
                                 setIsOpen(false);
+                                if (email?.seqNo !== 0) {
+                                    deleteEmail("Черновики", email!);
+                                }
+                                router.refresh();
                             }}
                         >
                             <Trash2 className="h-4 w-4" />
