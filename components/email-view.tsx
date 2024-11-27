@@ -1,13 +1,23 @@
+"use client";
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { cn, getMailboxLabel } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Email } from "@/types/email";
-import { ArrowLeftIcon, ReplyIcon, ForwardIcon, UserIcon } from "lucide-react";
+import {
+    ArrowLeftIcon,
+    ReplyIcon,
+    ForwardIcon,
+    UserIcon,
+    ArchiveRestoreIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { AttachmentView } from "./attachments-view";
-import { DeleteEmailButton } from "./delete-email-button";
+import { TrashIcon } from "lucide-react";
+import { deleteEmail } from "@/data/email";
+import { usePathname, useRouter } from "next/navigation";
 
 type Props = {
     email: Email;
@@ -18,6 +28,15 @@ type Props = {
 };
 
 export default function EmailView({ email, mailbox }: Props) {
+    const router = useRouter();
+    const pathname = usePathname();
+
+    const handleDelete = async () => {
+        await deleteEmail(mailbox.label, email);
+
+        router.push(pathname.split("/").slice(0, -1).join("/"));
+    };
+
     return (
         <div className="h-full w-full p-4">
             <Card className="flex h-full w-full flex-col border-none shadow-none">
@@ -34,10 +53,20 @@ export default function EmailView({ email, mailbox }: Props) {
                             <span>{mailbox.label}</span>
                         </Link>
                         <div className="flex space-x-2">
-                            <DeleteEmailButton
-                                mailbox={getMailboxLabel(mailbox.url)}
-                                email={email}
-                            />
+                            {mailbox.url === "/trash" && (
+                                <Button variant="ghost" size="icon">
+                                    <ArchiveRestoreIcon className="h-4 w-4" />
+                                    <span className="sr-only">Restore</span>
+                                </Button>
+                            )}
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={handleDelete}
+                            >
+                                <TrashIcon className="h-4 w-4" />
+                                <span className="sr-only">Delete</span>
+                            </Button>
                         </div>
                     </div>
                     <div className="flex items-start space-x-4">
@@ -97,17 +126,21 @@ export default function EmailView({ email, mailbox }: Props) {
                         </div>
                     )}
                 </CardContent>
-                <Separator />
-                <div className="flex justify-start space-x-2 p-4">
-                    <Button variant="outline">
-                        <ReplyIcon className="mr-2 h-4 w-4" />
-                        Ответить
-                    </Button>
-                    <Button variant="outline">
-                        <ForwardIcon className="mr-2 h-4 w-4" />
-                        Переслать
-                    </Button>
-                </div>
+                {mailbox.url !== "/trash" && (
+                    <>
+                        <Separator />
+                        <div className="flex justify-start space-x-2 p-4">
+                            <Button variant="outline">
+                                <ReplyIcon className="mr-2 h-4 w-4" />
+                                Ответить
+                            </Button>
+                            <Button variant="outline">
+                                <ForwardIcon className="mr-2 h-4 w-4" />
+                                Переслать
+                            </Button>
+                        </div>
+                    </>
+                )}
             </Card>
         </div>
     );
