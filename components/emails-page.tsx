@@ -16,13 +16,9 @@ import { CaretLeftIcon, CaretRightIcon } from "@radix-ui/react-icons";
 import { getEmailColumns } from "@/lib/columns";
 import { Email } from "@/types/email";
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 type Props = {
-    user: {
-        name: string;
-        address: string;
-    };
     emails: Email[];
     title: string;
     url: string;
@@ -30,7 +26,8 @@ type Props = {
 };
 
 export default function EmailsPage(props: Props) {
-    const columns = getEmailColumns(props.user.address);
+    const pathname = usePathname();
+    const columns = getEmailColumns(pathname);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
     const router = useRouter();

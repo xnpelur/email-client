@@ -1,22 +1,21 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Email } from "@/types/email";
 
-export const getEmailColumns = (
-    currentUserAddress: string,
-): ColumnDef<Email>[] => [
+export const getEmailColumns = (pathname: string): ColumnDef<Email>[] => [
     {
         accessorKey: "contact",
         cell: ({ row }) => {
-            const from = row.original.from;
-            const to = row.original.to;
-
-            const contact = from.address === currentUserAddress ? to : from;
-
-            return (
-                <div>
-                    {contact.name.length > 0 ? contact.name : contact.address}
-                </div>
-            );
+            switch (pathname) {
+                case "/inbox":
+                    return <div>{row.original.from.name}</div>;
+                case "/sent":
+                    return <div>{row.original.to.address}</div>;
+                case "/drafts":
+                    return <div>Черновик</div>;
+                case "/trash":
+                    return <div>{row.original.from.address}</div>;
+            }
+            throw new Error("Unknown pathname");
         },
         size: 250,
     },

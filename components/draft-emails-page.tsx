@@ -3,7 +3,6 @@
 import EmailsPage from "@/components/emails-page";
 import NewEmailDialog from "@/components/new-email-dialog";
 import { getEmail } from "@/data/email";
-import { getCurrentUser } from "@/data/user";
 import { Email } from "@/types/email";
 import { useState } from "react";
 
@@ -24,7 +23,6 @@ export default function DraftEmailsPage({ emails }: Props) {
             <EmailsPage
                 emails={emails}
                 title="Черновики"
-                user={getCurrentUser()}
                 url="/drafts"
                 onClick={fetchEmail}
             />
