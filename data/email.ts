@@ -72,6 +72,26 @@ export async function deleteEmail(
     await imap.deleteEmail(mailbox, email.seqNo);
 }
 
-export async function saveDraft(email: Email): Promise<void> {
+export async function saveDraft(formData: FormData): Promise<void> {
+    const receiver = formData.get("receiver") as string;
+    const subject = formData.get("subject") as string;
+    const text = formData.get("text") as string;
+    const files = formData.getAll("files") as File[];
+
+    const email: Email = {
+        seqNo: 0,
+        from: { name: "", address: process.env.EMAIL_ADDRESS! },
+        to: { name: "", address: receiver },
+        subject,
+        date: new Date(),
+        text,
+        attachments: await Promise.all(
+            files.map(async (file) => ({
+                filename: file.name,
+                content: Buffer.from(await file.arrayBuffer()),
+            })),
+        ),
+    };
+
     await imap.saveToMailbox(email, "Черновики", []);
 }

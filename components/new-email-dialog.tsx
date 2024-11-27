@@ -35,26 +35,20 @@ export default function NewEmailDialog() {
             onOpenChange={(value) => {
                 if (!value) {
                     const formData = new FormData(formRef.current!);
+                    files.forEach((file) => {
+                        formData.append("files", file);
+                    });
 
-                    const receiver = formData.get("receiver") as string;
-                    const subject = formData.get("subject") as string;
-                    const text = formData.get("text") as string;
-
-                    if (receiver && subject && text) {
-                        const email = {
-                            seqNo: 0,
-                            from: { name: "", address: "me" },
-                            to: {
-                                name: "",
-                                address: formData.get("receiver") as string,
-                            },
-                            subject: formData.get("subject") as string,
-                            date: new Date(),
-                            text: formData.get("text") as string,
-                            attachments: [],
-                        };
-                        saveDraft(email);
+                    if (
+                        formData.get("receiver") ||
+                        formData.get("subject") ||
+                        formData.get("text") ||
+                        files.length > 0
+                    ) {
+                        saveDraft(formData);
                     }
+                    formRef.current?.reset();
+                    setFiles([]);
                 }
                 setIsOpen(value);
             }}
@@ -145,7 +139,11 @@ export default function NewEmailDialog() {
                             type="button"
                             variant="ghost"
                             size="icon"
-                            onClick={() => formRef.current?.reset()}
+                            onClick={() => {
+                                formRef.current?.reset();
+                                setFiles([]);
+                                setIsOpen(false);
+                            }}
                         >
                             <Trash2 className="h-4 w-4" />
                         </Button>
