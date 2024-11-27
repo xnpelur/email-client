@@ -73,7 +73,7 @@ export default function NewEmailDialog({ email, hideTrigger }: Props) {
                         text !== lastText ||
                         !filesEqual
                     ) {
-                        saveDraft(formData);
+                        saveDraft(formData, email?.seqNo ?? 0);
                     }
                     formRef.current?.reset();
                     setFiles([]);

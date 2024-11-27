@@ -72,14 +72,17 @@ export async function deleteEmail(
     await imap.deleteEmail(mailbox, email.seqNo);
 }
 
-export async function saveDraft(formData: FormData): Promise<void> {
+export async function saveDraft(
+    formData: FormData,
+    seqNo: number,
+): Promise<void> {
     const receiver = formData.get("receiver") as string;
     const subject = formData.get("subject") as string;
     const text = formData.get("text") as string;
     const files = formData.getAll("files") as File[];
 
     const email: Email = {
-        seqNo: 0,
+        seqNo,
         from: { name: "", address: "" },
         to: { name: "", address: receiver },
         subject,
@@ -93,5 +96,8 @@ export async function saveDraft(formData: FormData): Promise<void> {
         ),
     };
 
+    if (email.seqNo !== 0) {
+        await imap.deleteEmail("Черновики", email.seqNo);
+    }
     await imap.saveToMailbox(email, "Черновики", []);
 }
