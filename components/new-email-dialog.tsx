@@ -8,11 +8,25 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { saveDraft, sendEmail } from "@/data/email";
 import { FilePicker } from "@/components/file-picker";
+import { Email } from "@/types/email";
 
-export default function NewEmailDialog() {
-    const [isOpen, setIsOpen] = useState(false);
+type Props = {
+    email?: Email;
+    hideTrigger?: boolean;
+};
+
+export default function NewEmailDialog({ email, hideTrigger }: Props) {
+    const [isOpen, setIsOpen] = useState(!!email);
     const formRef = useRef<HTMLFormElement>(null);
-    const [files, setFiles] = useState<File[]>([]);
+    const [files, setFiles] = useState<File[]>(() => {
+        if (!email?.attachments) return [];
+        return email.attachments.map(
+            (att) =>
+                new File([att.content], att.filename, {
+                    type: "application/octet-stream",
+                }),
+        );
+    });
 
     const handleSubmit = async (formData: FormData) => {
         files.forEach((file) => {
@@ -39,11 +53,25 @@ export default function NewEmailDialog() {
                         formData.append("files", file);
                     });
 
+                    const receiver = formData.get("receiver");
+                    const subject = formData.get("subject");
+                    const text = formData.get("text");
+
+                    const lastReceiver = email?.to.address ?? "";
+                    const lastSubject = email?.subject ?? "";
+                    const lastText = email?.text ?? "";
+                    const filesEqual =
+                        files.length === (email?.attachments?.length ?? 0) &&
+                        files.every(
+                            (file, i) =>
+                                file.name === email?.attachments?.[i].filename,
+                        );
+
                     if (
-                        formData.get("receiver") ||
-                        formData.get("subject") ||
-                        formData.get("text") ||
-                        files.length > 0
+                        receiver !== lastReceiver ||
+                        subject !== lastSubject ||
+                        text !== lastText ||
+                        !filesEqual
                     ) {
                         saveDraft(formData);
                     }
@@ -53,14 +81,16 @@ export default function NewEmailDialog() {
                 setIsOpen(value);
             }}
         >
-            <DialogTrigger asChild>
-                <Button
-                    className="w-full bg-slate-600 hover:bg-slate-700"
-                    onClick={() => setIsOpen(true)}
-                >
-                    Новое сообщение
-                </Button>
-            </DialogTrigger>
+            {!hideTrigger && (
+                <DialogTrigger asChild>
+                    <Button
+                        className="w-full bg-slate-600 hover:bg-slate-700"
+                        onClick={() => setIsOpen(true)}
+                    >
+                        Новое сообщение
+                    </Button>
+                </DialogTrigger>
+            )}
             <DialogContent
                 className="fixed bottom-4 left-auto right-4 top-auto w-[500px] max-w-[calc(100vw-2rem)] translate-x-0 translate-y-0 p-0 shadow-xl data-[state=closed]:duration-0 data-[state=open]:duration-0"
                 backgroundOpacity={0}
@@ -80,6 +110,7 @@ export default function NewEmailDialog() {
                             name="receiver"
                             placeholder="Кому"
                             className="rounded-none border-0 border-b px-0 py-3 focus-visible:ring-0 focus-visible:ring-offset-0"
+                            defaultValue={email?.to.address}
                             required
                         />
                         <Input
@@ -87,6 +118,7 @@ export default function NewEmailDialog() {
                             name="subject"
                             placeholder="Тема"
                             className="rounded-none border-0 border-b px-0 py-3 focus-visible:ring-0 focus-visible:ring-offset-0"
+                            defaultValue={email?.subject}
                             required
                         />
                         <div className="flex min-h-[300px] flex-col gap-2 pb-2">
@@ -95,6 +127,7 @@ export default function NewEmailDialog() {
                                 placeholder="Ваше сообщение..."
                                 className="flex-1 resize-none border-0 px-0 py-3 focus-visible:ring-0 focus-visible:ring-offset-0"
                                 required
+                                defaultValue={email?.text}
                             />
                             <div className="space-y-1">
                                 {files.map((file, index) => (

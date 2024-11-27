@@ -80,7 +80,7 @@ export async function saveDraft(formData: FormData): Promise<void> {
 
     const email: Email = {
         seqNo: 0,
-        from: { name: "", address: process.env.EMAIL_ADDRESS! },
+        from: { name: "", address: "" },
         to: { name: "", address: receiver },
         subject,
         date: new Date(),

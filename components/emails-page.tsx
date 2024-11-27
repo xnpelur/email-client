@@ -26,6 +26,7 @@ type Props = {
     emails: Email[];
     title: string;
     url: string;
+    onClick?: (seqNo: number) => void;
 };
 
 export default function EmailsPage(props: Props) {
@@ -89,9 +90,13 @@ export default function EmailsPage(props: Props) {
                                         row.getIsSelected() && "selected"
                                     }
                                     onClick={() => {
-                                        router.push(
-                                            `${props.url}/${row.original.seqNo}`,
-                                        );
+                                        if (props.onClick) {
+                                            props.onClick(row.original.seqNo);
+                                        } else {
+                                            router.push(
+                                                `${props.url}/${row.original.seqNo}`,
+                                            );
+                                        }
                                     }}
                                 >
                                     {row.getVisibleCells().map((cell) => (
