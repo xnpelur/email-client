@@ -30,6 +30,7 @@ export default function DraftEmailsPage({ emails }: Props) {
                 key={selectedEmail?.seqNo}
                 email={selectedEmail}
                 hideTrigger
+                onClose={() => setSelectedEmail(undefined)}
             />
         </>
     );

@@ -21,9 +21,10 @@ import { bufferToBase64 } from "@/lib/utils";
 type Props = {
     email?: Email;
     hideTrigger?: boolean;
+    onClose?: () => void;
 };
 
-export default function NewEmailDialog({ email, hideTrigger }: Props) {
+export default function NewEmailDialog({ email, hideTrigger, onClose }: Props) {
     const [isOpen, setIsOpen] = useState(!!email);
     const formRef = useRef<HTMLFormElement>(null);
     const [attachments, setAttachments] = useState<Attachment[]>(
@@ -55,6 +56,7 @@ export default function NewEmailDialog({ email, hideTrigger }: Props) {
             open={isOpen}
             onOpenChange={(value) => {
                 if (!value) {
+                    onClose?.();
                     const formData = new FormData(formRef.current!);
                     attachments.forEach((attachment) => {
                         formData.append("files-name", attachment.filename);
