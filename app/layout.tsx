@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-    title: "My Mail",
+    title: "Email Client",
 };
 
 export default function RootLayout({
