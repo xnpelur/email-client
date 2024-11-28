@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
+import { bufferToBase64, cn } from "@/lib/utils";
 import { Email } from "@/types/email";
 import {
     ArrowLeftIcon,
@@ -116,10 +116,9 @@ export default function EmailView({ email, mailbox }: Props) {
                                     key={index}
                                     attachment={{
                                         filename: attachment.filename,
-                                        contentBase64:
-                                            attachment.content.toString(
-                                                "base64",
-                                            ),
+                                        base64: bufferToBase64(
+                                            attachment.content,
+                                        ),
                                     }}
                                 />
                             ))}

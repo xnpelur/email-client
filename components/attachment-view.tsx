@@ -1,46 +1,39 @@
 "use client";
 
+import { base64ToBuffer } from "@/lib/utils";
 import { FileIcon } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export function AttachmentView({
     attachment,
 }: {
-    attachment: { filename: string; contentBase64: string };
+    attachment: { filename: string; base64: string };
 }) {
-    const getDownloadUrl = (contentBase64: string) => {
-        return "";
-        const byteCharacters = atob(contentBase64);
-        const byteArrays = [];
+    const [downloadUrl, setDownloadUrl] = useState<string>("");
 
-        for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-            const slice = byteCharacters.slice(offset, offset + 512);
+    useEffect(() => {
+        const buffer = base64ToBuffer(attachment.base64);
+        const blob = new Blob([buffer]);
+        const url = URL.createObjectURL(blob);
+        setDownloadUrl(url);
 
-            const byteNumbers = new Array(slice.length);
-            for (let i = 0; i < slice.length; i++) {
-                byteNumbers[i] = slice.charCodeAt(i);
-            }
-
-            const byteArray = new Uint8Array(byteNumbers);
-            byteArrays.push(byteArray);
-        }
-
-        const blob = new Blob(byteArrays);
-
-        return URL.createObjectURL(blob);
-    };
+        return () => {
+            URL.revokeObjectURL(url);
+        };
+    }, [attachment.base64]);
 
     return (
         <div className="flex items-center space-x-2">
             <FileIcon className="h-6 w-6 text-muted-foreground" />
-            <div>
+            {downloadUrl && (
                 <a
-                    href={getDownloadUrl(attachment.contentBase64)}
+                    href={downloadUrl}
                     download={attachment.filename}
                     className="text-sm font-medium text-primary hover:underline"
                 >
                     {attachment.filename}
                 </a>
-            </div>
+            )}
         </div>
     );
 }

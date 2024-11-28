@@ -3,6 +3,7 @@
 import { Email } from "@/types/email";
 import * as imap from "@/lib/imap";
 import * as smtp from "@/lib/smtp";
+import { base64ToBuffer } from "@/lib/utils";
 
 export async function getInboxEmails(): Promise<Email[]> {
     const emails = await imap.getEmails("INBOX");
@@ -31,7 +32,17 @@ export async function sendEmail(
     const receiver = formData.get("receiver") as string;
     const subject = formData.get("subject") as string;
     const text = formData.get("text") as string;
-    const files = formData.getAll("files") as File[];
+
+    const filenames = formData.getAll("files-name") as string[];
+    const filesBase64 = formData.getAll("files-base64") as string[];
+
+    const attachments = [];
+    for (let i = 0; i < filenames.length; i++) {
+        attachments.push({
+            filename: filenames[i],
+            content: base64ToBuffer(filesBase64[i]),
+        });
+    }
 
     const email: Email = {
         seqNo: 0,
@@ -40,12 +51,7 @@ export async function sendEmail(
         subject,
         date: new Date(),
         text,
-        attachments: await Promise.all(
-            files.map(async (file) => ({
-                filename: file.name,
-                content: Buffer.from(await file.arrayBuffer()),
-            })),
-        ),
+        attachments,
     };
 
     const success = await smtp.sendEmail(email);
@@ -85,7 +91,17 @@ export async function saveDraft(
     const receiver = formData.get("receiver") as string;
     const subject = formData.get("subject") as string;
     const text = formData.get("text") as string;
-    const files = formData.getAll("files") as File[];
+
+    const filenames = formData.getAll("files-name") as string[];
+    const filesBase64 = formData.getAll("files-base64") as string[];
+
+    const attachments = [];
+    for (let i = 0; i < filenames.length; i++) {
+        attachments.push({
+            filename: filenames[i],
+            content: base64ToBuffer(filesBase64[i]),
+        });
+    }
 
     const email: Email = {
         seqNo,
@@ -94,12 +110,7 @@ export async function saveDraft(
         subject,
         date: new Date(),
         text,
-        attachments: await Promise.all(
-            files.map(async (file) => ({
-                filename: file.name,
-                content: Buffer.from(await file.arrayBuffer()),
-            })),
-        ),
+        attachments,
     };
 
     if (email.seqNo !== 0) {

@@ -5,12 +5,18 @@ import { Send, Trash2, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
 import { deleteEmail, saveDraft, sendEmail } from "@/data/email";
 import { FilePicker } from "@/components/file-picker";
-import { Email } from "@/types/email";
+import { Attachment, Email } from "@/types/email";
 import { useRouter } from "next/navigation";
 import { AttachmentView } from "@/components/attachment-view";
+import { bufferToBase64 } from "@/lib/utils";
 
 type Props = {
     email?: Email;
@@ -20,20 +26,15 @@ type Props = {
 export default function NewEmailDialog({ email, hideTrigger }: Props) {
     const [isOpen, setIsOpen] = useState(!!email);
     const formRef = useRef<HTMLFormElement>(null);
-    const [files, setFiles] = useState<File[]>(() => {
-        if (!email?.attachments) return [];
-        return email.attachments.map(
-            (att) =>
-                new File([att.content], att.filename, {
-                    type: "application/octet-stream",
-                }),
-        );
-    });
+    const [attachments, setAttachments] = useState<Attachment[]>(
+        email?.attachments ?? [],
+    );
     const router = useRouter();
 
     const handleSubmit = async (formData: FormData) => {
-        files.forEach((file) => {
-            formData.append("files", file);
+        attachments.forEach((attachment) => {
+            formData.append("files-name", attachment.filename);
+            formData.append("files-base64", bufferToBase64(attachment.content));
         });
 
         const success = await sendEmail(formData, email?.seqNo);
@@ -55,8 +56,12 @@ export default function NewEmailDialog({ email, hideTrigger }: Props) {
             onOpenChange={(value) => {
                 if (!value) {
                     const formData = new FormData(formRef.current!);
-                    files.forEach((file) => {
-                        formData.append("files", file);
+                    attachments.forEach((attachment) => {
+                        formData.append("files-name", attachment.filename);
+                        formData.append(
+                            "files-base64",
+                            bufferToBase64(attachment.content),
+                        );
                     });
 
                     const receiver = formData.get("receiver");
@@ -66,23 +71,25 @@ export default function NewEmailDialog({ email, hideTrigger }: Props) {
                     const lastReceiver = email?.to.address ?? "";
                     const lastSubject = email?.subject ?? "";
                     const lastText = email?.text ?? "";
-                    const filesEqual =
-                        files.length === (email?.attachments?.length ?? 0) &&
-                        files.every(
-                            (file, i) =>
-                                file.name === email?.attachments?.[i].filename,
+                    const attachmentsEqual =
+                        attachments.length ===
+                            (email?.attachments?.length ?? 0) &&
+                        attachments.every(
+                            (attachment, i) =>
+                                attachment.filename ===
+                                email?.attachments?.[i].filename,
                         );
 
                     if (
                         receiver !== lastReceiver ||
                         subject !== lastSubject ||
                         text !== lastText ||
-                        !filesEqual
+                        !attachmentsEqual
                     ) {
                         saveDraft(formData, email?.seqNo ?? 0);
                     }
                     formRef.current?.reset();
-                    setFiles([]);
+                    setAttachments([]);
                 }
                 setIsOpen(value);
             }}
@@ -101,6 +108,7 @@ export default function NewEmailDialog({ email, hideTrigger }: Props) {
                 className="fixed bottom-4 left-auto right-4 top-auto w-[500px] max-w-[calc(100vw-2rem)] translate-x-0 translate-y-0 p-0 shadow-xl data-[state=closed]:duration-0 data-[state=open]:duration-0"
                 backgroundOpacity={0}
             >
+                <DialogTitle className="sr-only">Новое сообщение</DialogTitle>
                 <form
                     ref={formRef}
                     action={handleSubmit}
@@ -136,23 +144,25 @@ export default function NewEmailDialog({ email, hideTrigger }: Props) {
                                 defaultValue={email?.text}
                             />
                             <div className="space-y-1">
-                                {files.map((file, index) => (
+                                {attachments.map((attachment, index) => (
                                     <div
                                         key={index}
                                         className="flex items-center justify-between rounded-md border border-slate-300 bg-slate-100 px-2 py-1"
                                     >
                                         <AttachmentView
                                             attachment={{
-                                                filename: file.name,
-                                                contentBase64: "",
+                                                filename: attachment.filename,
+                                                base64: bufferToBase64(
+                                                    attachment.content,
+                                                ),
                                             }}
                                         />
                                         <Button
                                             variant="ghost"
                                             className="h-5 w-5 p-0 hover:bg-slate-200"
                                             onClick={() =>
-                                                setFiles(
-                                                    files.filter(
+                                                setAttachments(
+                                                    attachments.filter(
                                                         (_, i) => i !== index,
                                                     ),
                                                 )
@@ -165,7 +175,6 @@ export default function NewEmailDialog({ email, hideTrigger }: Props) {
                             </div>
                         </div>
                     </div>
-
                     <div className="mt-auto flex items-center justify-between border-t p-3">
                         <div className="space-x-2">
                             <Button
@@ -175,7 +184,10 @@ export default function NewEmailDialog({ email, hideTrigger }: Props) {
                                 <Send className="mr-2 h-4 w-4" />
                                 Отправить
                             </Button>
-                            <FilePicker files={files} setFiles={setFiles} />
+                            <FilePicker
+                                attachments={attachments}
+                                setAttachments={setAttachments}
+                            />
                         </div>
                         <Button
                             type="button"
@@ -183,7 +195,7 @@ export default function NewEmailDialog({ email, hideTrigger }: Props) {
                             size="icon"
                             onClick={() => {
                                 formRef.current?.reset();
-                                setFiles([]);
+                                setAttachments([]);
                                 setIsOpen(false);
                                 if (email?.seqNo !== 0) {
                                     deleteEmail("Черновики", email!);

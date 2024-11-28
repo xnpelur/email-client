@@ -19,3 +19,11 @@ export function getMailboxLabel(mailboxUrl: string): string {
             return mailboxUrl;
     }
 }
+
+export function bufferToBase64(buffer: Buffer): string {
+    return Buffer.from(buffer).toString("base64");
+}
+
+export function base64ToBuffer(base64: string): Buffer {
+    return Buffer.from(base64, "base64");
+}

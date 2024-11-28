@@ -1,3 +1,5 @@
+import { base64ToBuffer } from "./utils";
+
 type Contact = {
     name: string;
     address: string;
@@ -51,7 +53,7 @@ export function parseBody(body: string): BodyParseResult {
                 const filename = decodeBase64Mime(part.filename);
 
                 result.attachments.push({
-                    content: Buffer.from(part.content, "base64"),
+                    content: base64ToBuffer(part.content),
                     filename,
                 });
             }
@@ -135,7 +137,7 @@ function emptyState(): BodyParseState {
 }
 
 function decodeBase64(encodedWord: string) {
-    return Buffer.from(encodedWord, "base64").toString("utf8");
+    return base64ToBuffer(encodedWord).toString("utf8");
 }
 
 function decodeBase64Mime(encodedWord: string) {
@@ -153,8 +155,9 @@ function decodeBase64Mime(encodedWord: string) {
         return encodedWord;
     }
 
-    const buffer = Buffer.from(encodedText, "base64");
-    const decodedText = buffer.toString(charset as BufferEncoding);
+    const decodedText = base64ToBuffer(encodedText).toString(
+        charset as BufferEncoding,
+    );
 
     return decodedText;
 }

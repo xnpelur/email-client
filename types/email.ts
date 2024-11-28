@@ -11,8 +11,10 @@ export type Email = {
     subject: string;
     date: Date;
     text: string;
-    attachments: {
-        filename: string;
-        content: Buffer;
-    }[];
+    attachments: Attachment[];
+};
+
+export type Attachment = {
+    filename: string;
+    content: Buffer;
 };
