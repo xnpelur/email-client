@@ -14,7 +14,7 @@ import {
     ArchiveRestoreIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { AttachmentView } from "./attachments-view";
+import { AttachmentView } from "@/components/attachment-view";
 import { TrashIcon } from "lucide-react";
 import { deleteEmail } from "@/data/email";
 import { usePathname, useRouter } from "next/navigation";
@@ -107,7 +107,7 @@ export default function EmailView({ email, mailbox }: Props) {
                         ))}
                     </div>
                     {email.attachments.length > 0 && (
-                        <div className="rounded-lg bg-muted p-4">
+                        <div className="space-y-2 rounded-lg bg-muted p-4">
                             <p className="text-sm font-medium">
                                 Прикрепленные файлы
                             </p>

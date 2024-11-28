@@ -1,11 +1,14 @@
 "use client";
 
+import { FileIcon } from "lucide-react";
+
 export function AttachmentView({
     attachment,
 }: {
     attachment: { filename: string; contentBase64: string };
 }) {
     const getDownloadUrl = (contentBase64: string) => {
+        return "";
         const byteCharacters = atob(contentBase64);
         const byteArrays = [];
 
@@ -27,23 +30,8 @@ export function AttachmentView({
     };
 
     return (
-        <div className="mt-2 flex items-center space-x-2">
-            <div className="rounded bg-background p-2">
-                <svg
-                    className="h-6 w-6 text-muted-foreground"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                    />
-                </svg>
-            </div>
+        <div className="flex items-center space-x-2">
+            <FileIcon className="h-6 w-6 text-muted-foreground" />
             <div>
                 <a
                     href={getDownloadUrl(attachment.contentBase64)}

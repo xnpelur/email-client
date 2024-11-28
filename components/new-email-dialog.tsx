@@ -10,6 +10,7 @@ import { deleteEmail, saveDraft, sendEmail } from "@/data/email";
 import { FilePicker } from "@/components/file-picker";
 import { Email } from "@/types/email";
 import { useRouter } from "next/navigation";
+import { AttachmentView } from "@/components/attachment-view";
 
 type Props = {
     email?: Email;
@@ -138,14 +139,17 @@ export default function NewEmailDialog({ email, hideTrigger }: Props) {
                                 {files.map((file, index) => (
                                     <div
                                         key={index}
-                                        className="flex items-center justify-between rounded-md bg-slate-200 px-2 py-1"
+                                        className="flex items-center justify-between rounded-md border border-slate-300 bg-slate-100 px-2 py-1"
                                     >
-                                        <span className="truncate text-sm">
-                                            {file.name}
-                                        </span>
+                                        <AttachmentView
+                                            attachment={{
+                                                filename: file.name,
+                                                contentBase64: "",
+                                            }}
+                                        />
                                         <Button
                                             variant="ghost"
-                                            className="h-5 w-5 p-0"
+                                            className="h-5 w-5 p-0 hover:bg-slate-200"
                                             onClick={() =>
                                                 setFiles(
                                                     files.filter(
