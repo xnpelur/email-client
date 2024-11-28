@@ -14,30 +14,29 @@ import {
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { login } from "@/lib/login";
 
 export function LoginForm() {
     const formSchema = z.object({
-        username: z
-            .string()
-            .min(1, { message: "Имя пользователя не может быть пустым" }),
+        email: z.string().email({ message: "Введите корректный email" }),
         password: z.string().min(1, { message: "Пароль не может быть пустым" }),
     });
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            username: "",
+            email: "",
             password: "",
         },
     });
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        // const success = await login(values.username, values.password);
-        // if (!success) {
-        //     form.setError("root", {
-        //         message: "Неверный логин или пароль",
-        //     });
-        // }
+        const success = await login(values.email, values.password);
+        if (!success) {
+            form.setError("root", {
+                message: "Неверный логин или пароль",
+            });
+        }
     }
 
     return (
@@ -50,10 +49,10 @@ export function LoginForm() {
                     <CardContent className="space-y-4 p-0">
                         <FormField
                             control={form.control}
-                            name="username"
+                            name="email"
                             render={({ field }) => (
                                 <FormItem className="items-center">
-                                    <FormLabel>Имя пользователя</FormLabel>
+                                    <FormLabel>Email</FormLabel>
                                     <div className="flex items-center">
                                         <FormControl>
                                             <Input

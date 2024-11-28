@@ -243,3 +243,30 @@ export async function deleteEmail(
         client.connect();
     });
 }
+
+export async function testCredentials(
+    username: string,
+    password: string,
+): Promise<boolean> {
+    const client = new Imap({
+        user: username,
+        password: password,
+        host: process.env.IMAP_HOST!,
+        port: parseInt(process.env.IMAP_PORT!),
+        tls: true,
+    });
+
+    return new Promise((resolve, reject) => {
+        client.once("ready", () => {
+            client.end();
+            resolve(true);
+        });
+
+        client.once("error", (err: any) => {
+            client.end();
+            resolve(false);
+        });
+
+        client.connect();
+    });
+}

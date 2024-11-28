@@ -1,9 +1,8 @@
 import { UserCircleIcon } from "lucide-react";
-import { LogOutIcon } from "lucide-react";
-import { Button } from "../ui/button";
 import NewEmailDialog from "../new-email-dialog";
 import { NavigationPanel } from "@/components/sidebar/navigation-panel";
 import { getSession } from "@/lib/auth";
+import { LogoutButton } from "./logout-button";
 
 export async function Sidebar() {
     const session = await getSession();
@@ -25,13 +24,7 @@ export async function Sidebar() {
                 <NewEmailDialog />
                 <NavigationPanel />
             </div>
-            <Button
-                variant="ghost"
-                className="flex items-center justify-start text-slate-600 hover:bg-slate-200"
-            >
-                <LogOutIcon className="mr-2 h-4 w-4" />
-                Выйти
-            </Button>
+            <LogoutButton />
         </aside>
     );
 }
