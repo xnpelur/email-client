@@ -3,17 +3,21 @@
 import { Email } from "@/types/email";
 import Imap from "imap";
 import { parseContact, parseBody } from "@/lib/parsers";
+import { getSession } from "./auth";
 
-const imapConfig: Imap.Config = {
-    user: process.env.EMAIL_ADDRESS!,
-    password: process.env.EMAIL_PASSWORD!,
-    host: process.env.IMAP_HOST!,
-    port: parseInt(process.env.IMAP_PORT!),
-    tls: true,
-};
+function getClient(email: string, password: string): Imap {
+    return new Imap({
+        user: email,
+        password: password,
+        host: process.env.IMAP_HOST!,
+        port: parseInt(process.env.IMAP_PORT!),
+        tls: true,
+    });
+}
 
 export async function getEmails(mailboxPath: string): Promise<Email[]> {
-    const client = new Imap(imapConfig);
+    const session = await getSession();
+    const client = getClient(session!.user.email, session!.user.password);
 
     return new Promise((resolve, reject) => {
         const emails: Email[] = [];
@@ -72,7 +76,8 @@ export async function saveToMailbox(
     mailbox: string,
     flags: string[],
 ): Promise<void> {
-    const client = new Imap(imapConfig);
+    const session = await getSession();
+    const client = getClient(session!.user.email, session!.user.password);
 
     return new Promise((resolve, reject) => {
         client.once("ready", () => {
@@ -135,7 +140,8 @@ export async function getEmailBySeqNo(
     mailboxPath: string,
     seqNo: number,
 ): Promise<Email> {
-    const client = new Imap(imapConfig);
+    const session = await getSession();
+    const client = getClient(session!.user.email, session!.user.password);
 
     return new Promise((resolve, reject) => {
         client.once("ready", () => {
@@ -204,7 +210,8 @@ export async function deleteEmail(
     mailbox: string,
     seqNo: number,
 ): Promise<void> {
-    const client = new Imap(imapConfig);
+    const session = await getSession();
+    const client = getClient(session!.user.email, session!.user.password);
 
     return new Promise((resolve, reject) => {
         client.once("ready", () => {

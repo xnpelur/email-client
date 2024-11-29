@@ -4,6 +4,7 @@ import { Email } from "@/types/email";
 import * as imap from "@/lib/imap";
 import * as smtp from "@/lib/smtp";
 import { base64ToBuffer } from "@/lib/utils";
+import { getSession } from "@/lib/auth";
 
 export async function getInboxEmails(): Promise<Email[]> {
     const emails = await imap.getEmails("INBOX");
@@ -29,6 +30,11 @@ export async function sendEmail(
     formData: FormData,
     draftSeqNo?: number,
 ): Promise<boolean> {
+    const session = await getSession();
+    if (!session) {
+        return false;
+    }
+
     const receiver = formData.get("receiver") as string;
     const subject = formData.get("subject") as string;
     const text = formData.get("text") as string;
@@ -46,7 +52,7 @@ export async function sendEmail(
 
     const email: Email = {
         seqNo: 0,
-        from: { name: "", address: process.env.EMAIL_ADDRESS! },
+        from: { name: "", address: session.user.email },
         to: { name: "", address: receiver },
         subject,
         date: new Date(),
