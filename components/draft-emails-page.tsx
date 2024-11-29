@@ -14,7 +14,7 @@ export function DraftEmailsPage({ emails }: Props) {
     const [selectedEmail, setSelectedEmail] = useState<Email | undefined>();
 
     async function fetchEmail(sequenceNumber: number) {
-        const email = await getEmail("Черновики", sequenceNumber);
+        const email = await getEmail("drafts", sequenceNumber);
         setSelectedEmail(email);
     }
 

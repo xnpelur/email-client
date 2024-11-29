@@ -200,7 +200,7 @@ export function NewEmailDialog({ email, hideTrigger, onClose }: Props) {
                                 setAttachments([]);
                                 setIsOpen(false);
                                 if (email?.seqNo !== 0) {
-                                    deleteEmail("Черновики", email!);
+                                    deleteEmail("drafts", email!);
                                 }
                                 router.refresh();
                             }}

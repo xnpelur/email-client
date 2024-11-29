@@ -1,5 +1,6 @@
 "use server";
 
+import { Session } from "@/types/auth";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
@@ -9,15 +10,6 @@ if (!process.env.AUTH_SECRET || !process.env.AUTH_EXPIRATION_TIME) {
 }
 
 const key = new TextEncoder().encode(process.env.AUTH_SECRET);
-
-export type Session = {
-    user: User;
-};
-
-export type User = {
-    email: string;
-    password: string;
-};
 
 export async function getSession(): Promise<Session | null> {
     const session = cookies().get("session")?.value;

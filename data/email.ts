@@ -5,24 +5,25 @@ import * as imap from "@/lib/imap";
 import * as smtp from "@/lib/smtp";
 import { base64ToBuffer } from "@/lib/utils";
 import { getSession } from "@/lib/auth";
+import { User } from "@/types/auth";
 
 export async function getInboxEmails(): Promise<Email[]> {
-    const emails = await imap.getEmails("INBOX");
+    const emails = await imap.getEmails("inbox");
     return emails;
 }
 
 export async function getSentEmails(): Promise<Email[]> {
-    const emails = await imap.getEmails("Отправленные");
+    const emails = await imap.getEmails("sent");
     return emails;
 }
 
 export async function getDraftEmails(): Promise<Email[]> {
-    const emails = await imap.getEmails("Черновики");
+    const emails = await imap.getEmails("drafts");
     return emails;
 }
 
 export async function getTrashEmails(): Promise<Email[]> {
-    const emails = await imap.getEmails("Корзина");
+    const emails = await imap.getEmails("trash");
     return emails;
 }
 
@@ -63,9 +64,9 @@ export async function sendEmail(
     const success = await smtp.sendEmail(email);
 
     if (success) {
-        await imap.saveToMailbox(email, "Отправленные", ["\\Seen"]);
+        await imap.saveToMailbox(email, "sent", ["\\Seen"]);
         if (draftSeqNo) {
-            await imap.deleteEmail("Черновики", draftSeqNo);
+            await imap.deleteEmail("drafts", draftSeqNo);
         }
     }
 
@@ -73,7 +74,7 @@ export async function sendEmail(
 }
 
 export async function getEmail(
-    mailbox: string,
+    mailbox: keyof User["mailboxes"],
     sequenceNumber: number,
 ): Promise<Email> {
     const email = await imap.getEmailBySeqNo(mailbox, sequenceNumber);
@@ -81,11 +82,11 @@ export async function getEmail(
 }
 
 export async function deleteEmail(
-    mailbox: string,
+    mailbox: keyof User["mailboxes"],
     email: Email,
 ): Promise<void> {
-    if (mailbox !== "Корзина") {
-        await imap.saveToMailbox(email, "Корзина", []);
+    if (mailbox !== "trash") {
+        await imap.saveToMailbox(email, "trash", []);
     }
     await imap.deleteEmail(mailbox, email.seqNo);
 }
@@ -120,7 +121,7 @@ export async function saveDraft(
     };
 
     if (email.seqNo !== 0) {
-        await imap.deleteEmail("Черновики", email.seqNo);
+        await imap.deleteEmail("drafts", email.seqNo);
     }
-    await imap.saveToMailbox(email, "Черновики", []);
+    await imap.saveToMailbox(email, "drafts", []);
 }

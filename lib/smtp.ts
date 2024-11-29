@@ -8,8 +8,8 @@ export async function sendEmail(email: Email): Promise<boolean> {
     const session = await getSession();
 
     const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST!,
-        port: parseInt(process.env.SMTP_PORT!),
+        host: session!.user.smtpHost,
+        port: 465,
         secure: true,
         auth: {
             user: session!.user.email,

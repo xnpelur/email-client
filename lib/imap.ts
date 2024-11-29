@@ -4,63 +4,70 @@ import { Email } from "@/types/email";
 import Imap from "imap";
 import { parseContact, parseBody } from "@/lib/parsers";
 import { getSession } from "./auth";
+import { User } from "@/types/auth";
 
-function getClient(email: string, password: string): Imap {
+function getClient(user: User): Imap {
     return new Imap({
-        user: email,
-        password: password,
-        host: process.env.IMAP_HOST!,
-        port: parseInt(process.env.IMAP_PORT!),
+        user: user.email,
+        password: user.password,
+        host: user.imapHost,
+        port: 993,
         tls: true,
     });
 }
 
-export async function getEmails(mailboxPath: string): Promise<Email[]> {
+export async function getEmails(
+    mailbox: keyof User["mailboxes"],
+): Promise<Email[]> {
     const session = await getSession();
-    const client = getClient(session!.user.email, session!.user.password);
+    const client = getClient(session!.user);
 
     return new Promise((resolve, reject) => {
         const emails: Email[] = [];
 
         client.once("ready", () => {
-            client.openBox(mailboxPath, false, (err, box) => {
-                if (err) reject(err);
+            client.openBox(
+                session!.user.mailboxes[mailbox],
+                false,
+                (err, box) => {
+                    if (err) reject(err);
 
-                const fetch = client.seq.fetch("1:*", {
-                    bodies: ["HEADER.FIELDS (FROM TO SUBJECT DATE)"],
-                });
+                    const fetch = client.seq.fetch("1:*", {
+                        bodies: ["HEADER.FIELDS (FROM TO SUBJECT DATE)"],
+                    });
 
-                fetch.on("message", (msg, seqNo) => {
-                    msg.on("body", (stream) => {
-                        let buffer = "";
-                        stream.on("data", (chunk) => {
-                            buffer += chunk.toString("utf8");
-                        });
+                    fetch.on("message", (msg, seqNo) => {
+                        msg.on("body", (stream) => {
+                            let buffer = "";
+                            stream.on("data", (chunk) => {
+                                buffer += chunk.toString("utf8");
+                            });
 
-                        stream.once("end", () => {
-                            const header = Imap.parseHeader(buffer);
+                            stream.once("end", () => {
+                                const header = Imap.parseHeader(buffer);
 
-                            const from = header.from?.[0];
-                            const to = header.to?.[0];
+                                const from = header.from?.[0];
+                                const to = header.to?.[0];
 
-                            emails.push({
-                                seqNo,
-                                from: parseContact(from),
-                                to: parseContact(to),
-                                subject: header.subject?.[0] || "",
-                                date: new Date(header.date?.[0] || ""),
-                                text: "",
-                                attachments: [],
+                                emails.push({
+                                    seqNo,
+                                    from: parseContact(from),
+                                    to: parseContact(to),
+                                    subject: header.subject?.[0] || "",
+                                    date: new Date(header.date?.[0] || ""),
+                                    text: "",
+                                    attachments: [],
+                                });
                             });
                         });
                     });
-                });
 
-                fetch.once("end", () => {
-                    client.end();
-                    resolve(emails.reverse());
-                });
-            });
+                    fetch.once("end", () => {
+                        client.end();
+                        resolve(emails.reverse());
+                    });
+                },
+            );
         });
 
         client.once("error", (err: any) => {
@@ -73,15 +80,15 @@ export async function getEmails(mailboxPath: string): Promise<Email[]> {
 
 export async function saveToMailbox(
     email: Email,
-    mailbox: string,
+    mailbox: keyof User["mailboxes"],
     flags: string[],
 ): Promise<void> {
     const session = await getSession();
-    const client = getClient(session!.user.email, session!.user.password);
+    const client = getClient(session!.user);
 
     return new Promise((resolve, reject) => {
         client.once("ready", () => {
-            client.openBox(mailbox, true, (err, box) => {
+            client.openBox(session!.user.mailboxes[mailbox], true, (err) => {
                 if (err) {
                     reject(err);
                     return;
@@ -117,14 +124,18 @@ export async function saveToMailbox(
                     "--boundary--",
                 ].join("\r\n");
 
-                client.append(message, { mailbox, flags }, (err) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve();
-                    }
-                    client.end();
-                });
+                client.append(
+                    message,
+                    { mailbox: session!.user.mailboxes[mailbox], flags },
+                    (err) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve();
+                        }
+                        client.end();
+                    },
+                );
             });
         });
 
@@ -137,65 +148,75 @@ export async function saveToMailbox(
 }
 
 export async function getEmailBySeqNo(
-    mailboxPath: string,
+    mailbox: keyof User["mailboxes"],
     seqNo: number,
 ): Promise<Email> {
     const session = await getSession();
-    const client = getClient(session!.user.email, session!.user.password);
+    const client = getClient(session!.user);
 
     return new Promise((resolve, reject) => {
         client.once("ready", () => {
-            client.openBox(mailboxPath, false, (err, box) => {
-                if (err) reject(err);
+            client.openBox(
+                session!.user.mailboxes[mailbox],
+                false,
+                (err, box) => {
+                    if (err) reject(err);
 
-                const fetch = client.seq.fetch(seqNo, {
-                    bodies: ["HEADER.FIELDS (FROM TO SUBJECT DATE)", "TEXT"],
-                    struct: true,
-                });
+                    const fetch = client.seq.fetch(seqNo, {
+                        bodies: [
+                            "HEADER.FIELDS (FROM TO SUBJECT DATE)",
+                            "TEXT",
+                        ],
+                        struct: true,
+                    });
 
-                fetch.on("message", (msg) => {
-                    let headerBuffer = "";
-                    let textBuffer = "";
+                    fetch.on("message", (msg) => {
+                        let headerBuffer = "";
+                        let textBuffer = "";
 
-                    msg.on("body", (stream, info) => {
-                        let buffer = "";
-                        stream.on("data", (chunk) => {
-                            buffer += chunk.toString("utf8");
-                        });
+                        msg.on("body", (stream, info) => {
+                            let buffer = "";
+                            stream.on("data", (chunk) => {
+                                buffer += chunk.toString("utf8");
+                            });
 
-                        stream.once("end", () => {
-                            if (info.which === "TEXT") {
-                                textBuffer = buffer;
-                            } else {
-                                headerBuffer = buffer;
-                            }
+                            stream.once("end", () => {
+                                if (info.which === "TEXT") {
+                                    textBuffer = buffer;
+                                } else {
+                                    headerBuffer = buffer;
+                                }
 
-                            if (headerBuffer && textBuffer) {
-                                const header = Imap.parseHeader(headerBuffer);
+                                if (headerBuffer && textBuffer) {
+                                    const header =
+                                        Imap.parseHeader(headerBuffer);
 
-                                const from = header.from?.[0];
-                                const to = header.to?.[0];
+                                    const from = header.from?.[0];
+                                    const to = header.to?.[0];
 
-                                const bodyParseResult = parseBody(textBuffer);
+                                    const bodyParseResult =
+                                        parseBody(textBuffer);
 
-                                resolve({
-                                    seqNo,
-                                    from: parseContact(from),
-                                    to: parseContact(to),
-                                    subject: header.subject?.[0] || "",
-                                    date: new Date(header.date?.[0] || ""),
-                                    text: bodyParseResult.plain,
-                                    attachments: bodyParseResult.attachments,
-                                });
-                            }
+                                    resolve({
+                                        seqNo,
+                                        from: parseContact(from),
+                                        to: parseContact(to),
+                                        subject: header.subject?.[0] || "",
+                                        date: new Date(header.date?.[0] || ""),
+                                        text: bodyParseResult.plain,
+                                        attachments:
+                                            bodyParseResult.attachments,
+                                    });
+                                }
+                            });
                         });
                     });
-                });
 
-                fetch.once("end", () => {
-                    client.end();
-                });
-            });
+                    fetch.once("end", () => {
+                        client.end();
+                    });
+                },
+            );
         });
 
         client.once("error", (err: any) => {
@@ -207,15 +228,15 @@ export async function getEmailBySeqNo(
 }
 
 export async function deleteEmail(
-    mailbox: string,
+    mailbox: keyof User["mailboxes"],
     seqNo: number,
 ): Promise<void> {
     const session = await getSession();
-    const client = getClient(session!.user.email, session!.user.password);
+    const client = getClient(session!.user);
 
     return new Promise((resolve, reject) => {
         client.once("ready", () => {
-            client.openBox(mailbox, false, (err) => {
+            client.openBox(session!.user.mailboxes[mailbox], false, (err) => {
                 if (err) {
                     client.end();
                     reject(err);
@@ -252,14 +273,15 @@ export async function deleteEmail(
 }
 
 export async function testCredentials(
-    username: string,
+    email: string,
     password: string,
+    imapHost: string,
 ): Promise<boolean> {
     const client = new Imap({
-        user: username,
+        user: email,
         password: password,
-        host: process.env.IMAP_HOST!,
-        port: parseInt(process.env.IMAP_PORT!),
+        host: imapHost,
+        port: 993,
         tls: true,
     });
 

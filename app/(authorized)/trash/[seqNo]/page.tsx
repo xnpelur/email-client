@@ -6,12 +6,9 @@ export default async function EmailPage({
 }: {
     params: { seqNo: string };
 }) {
-    const email = await getEmail("Корзина", parseInt(params.seqNo));
+    const email = await getEmail("trash", parseInt(params.seqNo));
 
     return (
-        <EmailView
-            email={email}
-            mailbox={{ label: "Корзина", url: "/trash" }}
-        />
+        <EmailView email={email} mailbox="trash" previousPageTitle="Корзина" />
     );
 }

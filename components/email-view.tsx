@@ -18,21 +18,24 @@ import { AttachmentView } from "@/components/attachment-view";
 import { TrashIcon } from "lucide-react";
 import { deleteEmail } from "@/data/email";
 import { usePathname, useRouter } from "next/navigation";
+import { User } from "@/types/auth";
 
 type Props = {
     email: Email;
-    mailbox: {
-        label: string;
-        url: string;
-    };
+    mailbox: keyof User["mailboxes"];
+    previousPageTitle: string;
 };
 
-export default function EmailView({ email, mailbox }: Props) {
+export default function EmailView({
+    email,
+    mailbox,
+    previousPageTitle: mailboxLabel,
+}: Props) {
     const router = useRouter();
     const pathname = usePathname();
 
     const handleDelete = async () => {
-        await deleteEmail(mailbox.label, email);
+        await deleteEmail(mailbox, email);
 
         router.push(pathname.split("/").slice(0, -1).join("/"));
     };
@@ -43,17 +46,17 @@ export default function EmailView({ email, mailbox }: Props) {
                 <CardHeader className="flex flex-col space-y-4 pt-4">
                     <div className="flex items-center justify-between">
                         <Link
-                            href={mailbox.url}
+                            href={`/${mailbox}`}
                             className={cn(
                                 buttonVariants({ variant: "ghost" }),
                                 "gap-2 px-3",
                             )}
                         >
                             <ArrowLeftIcon className="h-4 w-4" />
-                            <span>{mailbox.label}</span>
+                            <span>{mailboxLabel}</span>
                         </Link>
                         <div className="flex space-x-2">
-                            {mailbox.url === "/trash" && (
+                            {mailbox === "trash" && (
                                 <Button variant="ghost" size="icon">
                                     <ArchiveRestoreIcon className="h-4 w-4" />
                                     <span className="sr-only">Restore</span>
@@ -125,7 +128,7 @@ export default function EmailView({ email, mailbox }: Props) {
                         </div>
                     )}
                 </CardContent>
-                {mailbox.url !== "/trash" && (
+                {mailbox !== "trash" && (
                     <>
                         <Separator />
                         <div className="flex justify-start space-x-2 p-4">
