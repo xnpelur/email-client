@@ -1,4 +1,4 @@
-import DraftEmailsPage from "@/components/draft-emails-page";
+import { DraftEmailsPage } from "@/components/draft-emails-page";
 import { getDraftEmails } from "@/data/email";
 
 export const dynamic = "force-dynamic";

@@ -1,13 +1,16 @@
 import { UserCircleIcon } from "lucide-react";
-import NewEmailDialog from "../new-email-dialog";
+import { NewEmailDialog } from "../new-email-dialog";
 import { NavigationPanel } from "@/components/sidebar/navigation-panel";
 import { getSession } from "@/lib/auth";
-import { LogoutButton } from "./logout-button";
+import { buttonVariants } from "@/components/ui/button";
+import { LogOutIcon } from "lucide-react";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export async function Sidebar() {
     const session = await getSession();
     if (session === null) {
-        return null;
+        throw new Error("Session is null");
     }
 
     return (
@@ -18,13 +21,22 @@ export async function Sidebar() {
                         <UserCircleIcon className="text-slate-600" />
                     </div>
                     <span className="truncate pb-1 text-base font-semibold text-slate-600">
-                        a_bbbbb_c@example.com
+                        {session.user.email}
                     </span>
                 </div>
                 <NewEmailDialog />
                 <NavigationPanel />
             </div>
-            <LogoutButton />
+            <Link
+                href="/api/logout"
+                className={cn(
+                    buttonVariants({ variant: "ghost" }),
+                    "flex items-center justify-start text-slate-600 hover:bg-slate-200",
+                )}
+            >
+                <LogOutIcon className="mr-2 h-4 w-4" />
+                Выйти
+            </Link>
         </aside>
     );
 }

@@ -25,7 +25,7 @@ type Props = {
     onClick?: (seqNo: number) => void;
 };
 
-export default function EmailsPage(props: Props) {
+export function EmailsPage(props: Props) {
     const pathname = usePathname();
     const columns = getEmailColumns(pathname);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);

@@ -1,4 +1,4 @@
-import EmailsPage from "@/components/emails-page";
+import { EmailsPage } from "@/components/emails-page";
 import { getInboxEmails } from "@/data/email";
 
 export const dynamic = "force-dynamic";

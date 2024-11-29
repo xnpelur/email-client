@@ -24,7 +24,7 @@ type Props = {
     onClose?: () => void;
 };
 
-export default function NewEmailDialog({ email, hideTrigger, onClose }: Props) {
+export function NewEmailDialog({ email, hideTrigger, onClose }: Props) {
     const [isOpen, setIsOpen] = useState(!!email);
     const formRef = useRef<HTMLFormElement>(null);
     const [attachments, setAttachments] = useState<Attachment[]>(

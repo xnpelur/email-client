@@ -19,8 +19,7 @@ export default function RootLayout({
     return (
         <html>
             <body className={cn(inter.className, "flex bg-slate-100")}>
-                <Sidebar />
-                <main className="h-full w-10 flex-1">{children}</main>
+                {children}
             </body>
         </html>
     );
