@@ -5,6 +5,8 @@ import { encrypt } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { User } from "@/types/auth";
 import { getProviderData } from "@/lib/providers";
+import { getPublicKey } from "@/data/keys";
+import { createKeyPair } from "@/data/keys";
 
 export async function login(email: string, password: string) {
     const providerData = getProviderData(email);
@@ -19,6 +21,10 @@ export async function login(email: string, password: string) {
     );
     if (!result) {
         return false;
+    }
+
+    if (!(await getPublicKey(email))) {
+        await createKeyPair(email);
     }
 
     const user: User = { email, password, ...providerData };
