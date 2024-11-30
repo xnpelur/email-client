@@ -24,7 +24,7 @@ export async function login(email: string, password: string) {
     }
 
     if (!(await getPublicKey(email))) {
-        await createKeyPair(email);
+        await createKeyPair(email, password);
     }
 
     const user: User = { email, password, ...providerData };
