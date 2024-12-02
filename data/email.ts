@@ -7,24 +7,19 @@ import { base64ToBuffer } from "@/lib/utils";
 import { getSession } from "@/lib/auth";
 import { User } from "@/types/auth";
 
-export async function getInboxEmails(): Promise<Email[]> {
-    const emails = await imap.getEmails("inbox");
+export async function getEmails(
+    mailbox: keyof User["mailboxes"],
+): Promise<Email[]> {
+    const emails = await imap.getEmails(mailbox);
     return emails;
 }
 
-export async function getSentEmails(): Promise<Email[]> {
-    const emails = await imap.getEmails("sent");
-    return emails;
-}
-
-export async function getDraftEmails(): Promise<Email[]> {
-    const emails = await imap.getEmails("drafts");
-    return emails;
-}
-
-export async function getTrashEmails(): Promise<Email[]> {
-    const emails = await imap.getEmails("trash");
-    return emails;
+export async function getEmail(
+    mailbox: keyof User["mailboxes"],
+    sequenceNumber: number,
+): Promise<Email> {
+    const email = await imap.getEmailBySeqNo(mailbox, sequenceNumber);
+    return email;
 }
 
 export async function sendEmail(
@@ -71,14 +66,6 @@ export async function sendEmail(
     }
 
     return success;
-}
-
-export async function getEmail(
-    mailbox: keyof User["mailboxes"],
-    sequenceNumber: number,
-): Promise<Email> {
-    const email = await imap.getEmailBySeqNo(mailbox, sequenceNumber);
-    return email;
 }
 
 export async function deleteEmail(
