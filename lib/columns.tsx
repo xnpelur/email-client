@@ -7,7 +7,13 @@ export const getEmailColumns = (pathname: string): ColumnDef<Email>[] => [
         cell: ({ row }) => {
             switch (pathname) {
                 case "/inbox":
-                    return <div>{row.original.from.name}</div>;
+                    return (
+                        <div>
+                            {row.original.from.name.length > 0
+                                ? row.original.from.name
+                                : row.original.from.address}
+                        </div>
+                    );
                 case "/sent":
                     return <div>{row.original.to.address}</div>;
                 case "/drafts":

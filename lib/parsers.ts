@@ -116,7 +116,7 @@ function parseLine(state: BodyParseState[], line: string): BodyParseState[] {
             .trim();
 
         if (currentPart.contentDisposition === "attachment") {
-            currentPart.filename = line.split("filename=")[1].slice(1, -1);
+            currentPart.filename = line.split("filename=")[1].replace(/"/g, "");
         }
 
         return state;

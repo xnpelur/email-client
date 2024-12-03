@@ -33,7 +33,7 @@ export async function getEmails(
                     if (err) reject(err);
 
                     const fetch = client.seq.fetch("1:*", {
-                        bodies: ["HEADER.FIELDS (FROM TO SUBJECT DATE)"],
+                        bodies: "",
                     });
 
                     fetch.on("message", (msg, seqNo) => {
@@ -160,54 +160,39 @@ export async function getEmailBySeqNo(
                 session!.user.mailboxes[mailbox],
                 false,
                 (err, box) => {
-                    if (err) reject(err);
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
 
                     const fetch = client.seq.fetch(seqNo, {
-                        bodies: [
-                            "HEADER.FIELDS (FROM TO SUBJECT DATE)",
-                            "TEXT",
-                        ],
-                        struct: true,
+                        bodies: "",
                     });
 
                     fetch.on("message", (msg) => {
-                        let headerBuffer = "";
-                        let textBuffer = "";
+                        let buffer = "";
 
-                        msg.on("body", (stream, info) => {
-                            let buffer = "";
+                        msg.on("body", (stream) => {
                             stream.on("data", (chunk) => {
                                 buffer += chunk.toString("utf8");
                             });
 
                             stream.once("end", () => {
-                                if (info.which === "TEXT") {
-                                    textBuffer = buffer;
-                                } else {
-                                    headerBuffer = buffer;
-                                }
+                                const header = Imap.parseHeader(buffer);
+                                const from = header.from?.[0];
+                                const to = header.to?.[0];
 
-                                if (headerBuffer && textBuffer) {
-                                    const header =
-                                        Imap.parseHeader(headerBuffer);
+                                const bodyParseResult = parseBody(buffer);
 
-                                    const from = header.from?.[0];
-                                    const to = header.to?.[0];
-
-                                    const bodyParseResult =
-                                        parseBody(textBuffer);
-
-                                    resolve({
-                                        seqNo,
-                                        from: parseContact(from),
-                                        to: parseContact(to),
-                                        subject: header.subject?.[0] || "",
-                                        date: new Date(header.date?.[0] || ""),
-                                        text: bodyParseResult.plain,
-                                        attachments:
-                                            bodyParseResult.attachments,
-                                    });
-                                }
+                                resolve({
+                                    seqNo,
+                                    from: parseContact(from),
+                                    to: parseContact(to),
+                                    subject: header.subject?.[0] || "",
+                                    date: new Date(header.date?.[0] || ""),
+                                    text: bodyParseResult.plain,
+                                    attachments: bodyParseResult.attachments,
+                                });
                             });
                         });
                     });

@@ -22,6 +22,8 @@ export async function sendEmail(email: Email): Promise<boolean> {
             ...email,
             from: email.from.address,
             to: email.to.address,
+            encoding: "base64",
+            textEncoding: "base64",
         },
         (error, info) => {
             if (error) {
