@@ -6,20 +6,73 @@ import * as smtp from "@/lib/smtp";
 import { base64ToBuffer } from "@/lib/utils";
 import { getSession } from "@/lib/auth";
 import { User } from "@/types/auth";
+import { encrypt, decrypt } from "@/lib/encryption";
 
 export async function getEmails(
     mailbox: keyof User["mailboxes"],
 ): Promise<Email[]> {
+    const session = await getSession();
+    if (!session) return [];
+
     const emails = await imap.getEmails(mailbox);
-    return emails;
+
+    const decryptedEmails = await Promise.all(
+        emails.map(async (email) => {
+            try {
+                const decryptedText = decrypt(
+                    Buffer.from(email.text, "base64"),
+                ).toString();
+
+                const decryptedAttachments = await Promise.all(
+                    (email.attachments || []).map(async (attachment) => ({
+                        ...attachment,
+                        content: decrypt(attachment.content),
+                    })),
+                );
+
+                return {
+                    ...email,
+                    text: decryptedText,
+                    attachments: decryptedAttachments,
+                };
+            } catch (error) {
+                return email;
+            }
+        }),
+    );
+
+    return decryptedEmails;
 }
 
 export async function getEmail(
     mailbox: keyof User["mailboxes"],
     sequenceNumber: number,
 ): Promise<Email> {
+    const session = await getSession();
+    if (!session) throw new Error("Unauthorized");
+
     const email = await imap.getEmailBySeqNo(mailbox, sequenceNumber);
-    return email;
+
+    try {
+        const decryptedText = decrypt(
+            Buffer.from(email.text, "base64"),
+        ).toString();
+
+        const decryptedAttachments = await Promise.all(
+            (email.attachments || []).map(async (attachment) => ({
+                ...attachment,
+                content: decrypt(attachment.content),
+            })),
+        );
+
+        return {
+            ...email,
+            text: decryptedText,
+            attachments: decryptedAttachments,
+        };
+    } catch (error) {
+        return email;
+    }
 }
 
 export async function sendEmail(
@@ -38,11 +91,14 @@ export async function sendEmail(
     const filenames = formData.getAll("files-name") as string[];
     const filesBase64 = formData.getAll("files-base64") as string[];
 
+    const encryptedText = encrypt(Buffer.from(text)).toString("base64");
+
     const attachments = [];
     for (let i = 0; i < filenames.length; i++) {
+        const fileContent = base64ToBuffer(filesBase64[i]);
         attachments.push({
             filename: filenames[i],
-            content: base64ToBuffer(filesBase64[i]),
+            content: encrypt(fileContent),
         });
     }
 
@@ -52,7 +108,7 @@ export async function sendEmail(
         to: { name: "", address: receiver },
         subject,
         date: new Date(),
-        text,
+        text: encryptedText,
         attachments,
     };
 

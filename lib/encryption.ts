@@ -1,25 +1,18 @@
-import {
-    createCipheriv,
-    randomBytes,
-    publicEncrypt,
-    privateDecrypt,
-    createDecipheriv,
-} from "crypto";
+import { createCipheriv, randomBytes, createDecipheriv } from "crypto";
 
-export function encrypt(data: Buffer, publicKey: string): Buffer {
-    const tripleDESKey = randomBytes(24);
+export function encrypt(data: Buffer): Buffer {
+    const key = randomBytes(24);
 
-    const cipher = createCipheriv("des-ede3", tripleDESKey, null);
+    const cipher = createCipheriv("des-ede3", key, null);
     const encryptedData = Buffer.concat([cipher.update(data), cipher.final()]);
 
-    const encryptedKey = publicEncrypt(publicKey, tripleDESKey);
-
-    return Buffer.concat([encryptedKey, encryptedData]);
+    return Buffer.concat([key, encryptedData]);
 }
 
-export function decrypt(data: Buffer, privateKey: string): Buffer {
-    const tripleDESKey = privateDecrypt(privateKey, data.subarray(0, 24));
-    const cipher = createDecipheriv("des-ede3", tripleDESKey, null);
+export function decrypt(data: Buffer): Buffer {
+    const key = data.subarray(0, 24);
+    const encryptedData = data.subarray(24);
 
-    return Buffer.concat([cipher.update(data.subarray(24)), cipher.final()]);
+    const decipher = createDecipheriv("des-ede3", key, null);
+    return Buffer.concat([decipher.update(encryptedData), decipher.final()]);
 }

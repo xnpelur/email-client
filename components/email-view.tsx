@@ -153,7 +153,6 @@ function ContactView({
 }: {
     contact: { name: string; address: string };
 }) {
-    console.log(contact);
     if (contact.name.length === 0) {
         return <span className="font-normal">{contact.address}</span>;
     }
