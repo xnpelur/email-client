@@ -7,6 +7,7 @@ import { base64ToBuffer } from "@/lib/utils";
 import { getSession } from "@/lib/auth";
 import { User } from "@/types/auth";
 import { encrypt, decrypt } from "@/lib/encryption";
+import { getPublicKey, getPrivateKey } from "@/data/keys";
 
 export async function getEmails(
     mailbox: keyof User["mailboxes"],
@@ -16,17 +17,24 @@ export async function getEmails(
 
     const emails = await imap.getEmails(mailbox);
 
+    const privateKey = await getPrivateKey(
+        session.user.email,
+        session.user.password,
+    );
+    if (!privateKey) return emails;
+
     const decryptedEmails = await Promise.all(
         emails.map(async (email) => {
             try {
                 const decryptedText = decrypt(
                     Buffer.from(email.text, "base64"),
+                    privateKey,
                 ).toString();
 
                 const decryptedAttachments = await Promise.all(
                     (email.attachments || []).map(async (attachment) => ({
                         ...attachment,
-                        content: decrypt(attachment.content),
+                        content: decrypt(attachment.content, privateKey),
                     })),
                 );
 
@@ -54,15 +62,22 @@ export async function getEmail(
 
     const email = await imap.getEmailBySeqNo(mailbox, sequenceNumber);
 
+    const privateKey = await getPrivateKey(
+        session.user.email,
+        session.user.password,
+    );
+    if (!privateKey) return email;
+
     try {
         const decryptedText = decrypt(
             Buffer.from(email.text, "base64"),
+            privateKey,
         ).toString();
 
         const decryptedAttachments = await Promise.all(
             (email.attachments || []).map(async (attachment) => ({
                 ...attachment,
-                content: decrypt(attachment.content),
+                content: decrypt(attachment.content, privateKey),
             })),
         );
 
@@ -93,14 +108,11 @@ export async function sendEmail(
     const filenames = formData.getAll("files-name") as string[];
     const filesBase64 = formData.getAll("files-base64") as string[];
 
-    const encryptedText = encrypt(Buffer.from(text)).toString("base64");
-
     const attachments = [];
     for (let i = 0; i < filenames.length; i++) {
-        const fileContent = base64ToBuffer(filesBase64[i]);
         attachments.push({
             filename: filenames[i],
-            content: encrypt(fileContent),
+            content: base64ToBuffer(filesBase64[i]),
         });
     }
 
@@ -110,12 +122,35 @@ export async function sendEmail(
         to: { name: "", address: receiver },
         subject,
         date: new Date(),
-        text: encryptedText,
+        text,
         attachments,
         encrypted: false,
     };
 
-    const success = await smtp.sendEmail(email);
+    const receiverPublicKey = await getPublicKey(receiver);
+    let success = false;
+
+    if (receiverPublicKey) {
+        const encryptedText = encrypt(
+            Buffer.from(text),
+            receiverPublicKey,
+        ).toString("base64");
+        const encryptedAttachments = attachments.map((attachment) => ({
+            ...attachment,
+            content: encrypt(attachment.content, receiverPublicKey),
+        }));
+
+        const encryptedEmail = {
+            ...email,
+            text: encryptedText,
+            attachments: encryptedAttachments,
+            encrypted: true,
+        };
+
+        success = await smtp.sendEmail(encryptedEmail);
+    } else {
+        success = await smtp.sendEmail(email);
+    }
 
     if (success) {
         await imap.saveToMailbox(email, "sent", ["\\Seen"]);

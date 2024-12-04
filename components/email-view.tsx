@@ -85,15 +85,16 @@ export default function EmailView({
                                     <h2 className="text-xl font-semibold">
                                         {email.subject}
                                     </h2>
-                                    {email.encrypted ? (
-                                        <Badge className="bg-green-600 hover:bg-green-700">
-                                            Защищено
-                                        </Badge>
-                                    ) : (
-                                        <Badge className="bg-red-600 hover:bg-red-700">
-                                            Не защищено
-                                        </Badge>
-                                    )}
+                                    {mailbox === "inbox" &&
+                                        (email.encrypted ? (
+                                            <Badge className="bg-green-600 hover:bg-green-700">
+                                                Защищено
+                                            </Badge>
+                                        ) : (
+                                            <Badge className="bg-red-600 hover:bg-red-700">
+                                                Не защищено
+                                            </Badge>
+                                        ))}
                                 </div>
                                 <span className="text-sm text-muted-foreground">
                                     {email.date.toLocaleDateString("ru", {
