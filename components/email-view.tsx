@@ -19,6 +19,7 @@ import { TrashIcon } from "lucide-react";
 import { deleteEmail } from "@/data/email";
 import { usePathname, useRouter } from "next/navigation";
 import { User } from "@/types/auth";
+import { Badge } from "./ui/badge";
 
 type Props = {
     email: Email;
@@ -80,9 +81,20 @@ export default function EmailView({
                         </Avatar>
                         <div className="flex-1 space-y-1">
                             <div className="flex items-center justify-between">
-                                <h2 className="text-xl font-semibold">
-                                    {email.subject}
-                                </h2>
+                                <div className="flex items-center gap-2">
+                                    <h2 className="text-xl font-semibold">
+                                        {email.subject}
+                                    </h2>
+                                    {email.encrypted ? (
+                                        <Badge className="bg-green-600 hover:bg-green-700">
+                                            Защищено
+                                        </Badge>
+                                    ) : (
+                                        <Badge className="bg-red-600 hover:bg-red-700">
+                                            Не защищено
+                                        </Badge>
+                                    )}
+                                </div>
                                 <span className="text-sm text-muted-foreground">
                                     {email.date.toLocaleDateString("ru", {
                                         day: "numeric",

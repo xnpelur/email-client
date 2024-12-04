@@ -57,6 +57,7 @@ export async function getEmails(
                                     date: new Date(header.date?.[0] || ""),
                                     text: "",
                                     attachments: [],
+                                    encrypted: false,
                                 });
                             });
                         });
@@ -192,6 +193,7 @@ export async function getEmailBySeqNo(
                                     date: new Date(header.date?.[0] || ""),
                                     text: bodyParseResult.plain,
                                     attachments: bodyParseResult.attachments,
+                                    encrypted: false,
                                 });
                             });
                         });

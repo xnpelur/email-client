@@ -12,6 +12,7 @@ export type Email = {
     date: Date;
     text: string;
     attachments: Attachment[];
+    encrypted: boolean;
 };
 
 export type Attachment = {

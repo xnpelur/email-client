@@ -34,6 +34,7 @@ export async function getEmails(
                     ...email,
                     text: decryptedText,
                     attachments: decryptedAttachments,
+                    encrypted: true,
                 };
             } catch (error) {
                 return email;
@@ -69,6 +70,7 @@ export async function getEmail(
             ...email,
             text: decryptedText,
             attachments: decryptedAttachments,
+            encrypted: true,
         };
     } catch (error) {
         return email;
@@ -110,6 +112,7 @@ export async function sendEmail(
         date: new Date(),
         text: encryptedText,
         attachments,
+        encrypted: false,
     };
 
     const success = await smtp.sendEmail(email);
@@ -161,6 +164,7 @@ export async function saveDraft(
         date: new Date(),
         text,
         attachments,
+        encrypted: false,
     };
 
     if (email.seqNo !== 0) {
