@@ -153,7 +153,7 @@ export async function sendEmail(
     }
 
     if (success) {
-        await imap.saveToMailbox(email, "sent", ["\\Seen"]);
+        await saveToMailboxEncrypted(email, "sent");
         if (draftSeqNo) {
             await imap.deleteEmail("drafts", draftSeqNo);
         }
@@ -167,7 +167,7 @@ export async function deleteEmail(
     email: Email,
 ): Promise<void> {
     if (mailbox !== "trash") {
-        await imap.saveToMailbox(email, "trash", []);
+        await saveToMailboxEncrypted(email, "trash");
     }
     await imap.deleteEmail(mailbox, email.seqNo);
 }
@@ -205,5 +205,37 @@ export async function saveDraft(
     if (email.seqNo !== 0) {
         await imap.deleteEmail("drafts", email.seqNo);
     }
-    await imap.saveToMailbox(email, "drafts", []);
+    await saveToMailboxEncrypted(email, "drafts");
+}
+
+async function saveToMailboxEncrypted(
+    email: Email,
+    mailbox: keyof User["mailboxes"],
+): Promise<void> {
+    const session = await getSession();
+    if (!session) {
+        return;
+    }
+
+    const receiverPublicKey = await getPublicKey(session.user.email);
+    if (!receiverPublicKey) return;
+
+    const encryptedText = encrypt(
+        Buffer.from(email.text),
+        receiverPublicKey,
+    ).toString("base64");
+
+    const encryptedAttachments = email.attachments.map((attachment) => ({
+        ...attachment,
+        content: encrypt(attachment.content, receiverPublicKey),
+    }));
+
+    const encryptedEmail = {
+        ...email,
+        text: encryptedText,
+        attachments: encryptedAttachments,
+        encrypted: true,
+    };
+
+    await imap.saveToMailbox(encryptedEmail, mailbox, ["\\Seen"]);
 }
