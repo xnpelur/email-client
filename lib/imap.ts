@@ -107,7 +107,7 @@ export async function saveToMailbox(
                     `Content-Type: multipart/mixed; boundary="boundary"`,
                     "",
                     "--boundary",
-                    "Content-Type: text/plain; charset=utf-8",
+                    "Content-Type: text/html; charset=utf-8",
                     "",
                     email.text,
                     ...email.attachments.map((attachment) =>
@@ -184,6 +184,7 @@ export async function getEmailBySeqNo(
                                 const to = header.to?.[0];
 
                                 const bodyParseResult = parseBody(buffer);
+                                console.log(bodyParseResult);
 
                                 resolve({
                                     seqNo,
@@ -191,7 +192,7 @@ export async function getEmailBySeqNo(
                                     to: parseContact(to),
                                     subject: header.subject?.[0] || "",
                                     date: new Date(header.date?.[0] || ""),
-                                    text: bodyParseResult.plain,
+                                    text: bodyParseResult.html,
                                     attachments: bodyParseResult.attachments,
                                     encrypted: false,
                                 });

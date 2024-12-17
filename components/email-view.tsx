@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { bufferToBase64, cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Email } from "@/types/email";
 import {
     ArrowLeftIcon,
@@ -116,11 +116,9 @@ export default function EmailView({
                     </div>
                 </CardHeader>
                 <Separator />
-                <CardContent className="flex-1 space-y-6 overflow-auto pt-6">
+                <CardContent className="flex-1 space-y-6 overflow-auto pt-4">
                     <div className="max-w-none">
-                        {email.text.split("\n").map((line, index) => (
-                            <p key={index}>{line}</p>
-                        ))}
+                        <div dangerouslySetInnerHTML={{ __html: email.text }} />
                     </div>
                     {email.attachments.length > 0 && (
                         <div className="space-y-2 rounded-lg bg-muted p-4">

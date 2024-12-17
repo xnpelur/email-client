@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Send, Trash2, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,8 @@ import { FilePicker } from "@/components/file-picker";
 import { Attachment, Email } from "@/types/email";
 import { useRouter } from "next/navigation";
 import { AttachmentView } from "@/components/attachment-view";
+import { MinimalTiptapEditor } from "./minimal-tiptap";
+import { Content } from "@tiptap/react";
 
 type Props = {
     email?: Email;
@@ -26,12 +28,15 @@ type Props = {
 export function NewEmailDialog({ email, hideTrigger, onClose }: Props) {
     const [isOpen, setIsOpen] = useState(!!email);
     const formRef = useRef<HTMLFormElement>(null);
+
+    const [text, setText] = useState<Content>(email?.text ?? "");
     const [attachments, setAttachments] = useState<Attachment[]>(
         email?.attachments ?? [],
     );
     const router = useRouter();
 
     const handleSubmit = async (formData: FormData) => {
+        formData.append("text", text?.toString() ?? "");
         attachments.forEach((attachment) => {
             formData.append("files-name", attachment.filename);
             formData.append("files-base64", attachment.content);
@@ -42,6 +47,7 @@ export function NewEmailDialog({ email, hideTrigger, onClose }: Props) {
         if (success) {
             setIsOpen(false);
             formRef.current?.reset();
+            setAttachments([]);
             if (email) {
                 router.refresh();
             }
@@ -57,6 +63,7 @@ export function NewEmailDialog({ email, hideTrigger, onClose }: Props) {
                 if (!value) {
                     onClose?.();
                     const formData = new FormData(formRef.current!);
+                    formData.append("text", text?.toString() ?? "");
                     attachments.forEach((attachment) => {
                         formData.append("files-name", attachment.filename);
                         formData.append("files-base64", attachment.content);
@@ -64,7 +71,6 @@ export function NewEmailDialog({ email, hideTrigger, onClose }: Props) {
 
                     const receiver = formData.get("receiver");
                     const subject = formData.get("subject");
-                    const text = formData.get("text");
 
                     const lastReceiver = email?.to.address ?? "";
                     const lastSubject = email?.subject ?? "";
@@ -134,12 +140,12 @@ export function NewEmailDialog({ email, hideTrigger, onClose }: Props) {
                             required
                         />
                         <div className="flex min-h-[300px] flex-col gap-2 pb-2">
-                            <Textarea
-                                name="text"
+                            <MinimalTiptapEditor
+                                value={text}
+                                onChange={setText}
+                                editorClassName="focus:outline-none focus-within:outline-none placeholder:text-muted-foreground"
                                 placeholder="Ваше сообщение..."
-                                className="flex-1 resize-none border-0 px-0 py-3 focus-visible:ring-0 focus-visible:ring-offset-0"
-                                required
-                                defaultValue={email?.text}
+                                className="pt-3 text-sm"
                             />
                             <div className="space-y-1">
                                 {attachments.map((attachment, index) => (

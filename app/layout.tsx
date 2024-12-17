@@ -4,6 +4,7 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Sidebar } from "@/components/sidebar/sidebar";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,7 +20,7 @@ export default function RootLayout({
     return (
         <html>
             <body className={cn(inter.className, "flex bg-slate-100")}>
-                {children}
+                <TooltipProvider>{children}</TooltipProvider>
             </body>
         </html>
     );

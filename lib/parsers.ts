@@ -70,6 +70,10 @@ export function parseBody(body: string): BodyParseResult {
         }
     }
 
+    if (result.html.length === 0) {
+        result.html = result.plain;
+    }
+
     return result;
 }
 
