@@ -1,3 +1,4 @@
+import { Attachment } from "@/types/email";
 import { base64ToBuffer } from "./utils";
 
 type Contact = {
@@ -9,11 +10,6 @@ type BodyParseResult = {
     plain: string;
     html: string;
     attachments: Attachment[];
-};
-
-type Attachment = {
-    content: Buffer;
-    filename: string;
 };
 
 type BodyParseState = {
@@ -53,7 +49,7 @@ export function parseBody(body: string): BodyParseResult {
                 const filename = decodeBase64Mime(part.filename);
 
                 result.attachments.push({
-                    content: base64ToBuffer(part.content),
+                    content: part.content,
                     filename,
                 });
             }

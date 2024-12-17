@@ -118,7 +118,7 @@ export async function saveToMailbox(
                             "Content-Transfer-Encoding: base64",
                             `Content-Disposition: attachment; filename="${attachment.filename}"`,
                             "",
-                            attachment.content.toString("base64"),
+                            attachment.content,
                         ].join("\r\n"),
                     ),
                     "",

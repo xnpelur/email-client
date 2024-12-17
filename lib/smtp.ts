@@ -24,6 +24,10 @@ export async function sendEmail(email: Email): Promise<boolean> {
             to: email.to.address,
             encoding: "base64",
             textEncoding: "base64",
+            attachments: email.attachments.map((attachment) => ({
+                ...attachment,
+                encoding: "base64",
+            })),
         },
         (error, info) => {
             if (error) {

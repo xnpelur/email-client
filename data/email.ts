@@ -3,10 +3,14 @@
 import { Email } from "@/types/email";
 import * as imap from "@/lib/imap";
 import * as smtp from "@/lib/smtp";
-import { base64ToBuffer } from "@/lib/utils";
 import { getSession } from "@/lib/auth";
 import { User } from "@/types/auth";
-import { encrypt, decrypt } from "@/lib/encryption";
+import {
+    encryptBase64,
+    decryptBase64,
+    decryptString,
+    encryptString,
+} from "@/lib/encryption";
 import { getPublicKey, getPrivateKey } from "@/data/keys";
 
 export async function getEmails(
@@ -26,15 +30,12 @@ export async function getEmails(
     const decryptedEmails = await Promise.all(
         emails.map(async (email) => {
             try {
-                const decryptedText = decrypt(
-                    Buffer.from(email.text, "base64"),
-                    privateKey,
-                ).toString();
+                const decryptedText = decryptString(email.text, privateKey);
 
                 const decryptedAttachments = await Promise.all(
                     (email.attachments || []).map(async (attachment) => ({
                         ...attachment,
-                        content: decrypt(attachment.content, privateKey),
+                        content: decryptBase64(attachment.content, privateKey),
                     })),
                 );
 
@@ -61,7 +62,6 @@ export async function getEmail(
     if (!session) throw new Error("Unauthorized");
 
     const email = await imap.getEmailBySeqNo(mailbox, sequenceNumber);
-
     const privateKey = await getPrivateKey(
         session.user.email,
         session.user.password,
@@ -69,15 +69,12 @@ export async function getEmail(
     if (!privateKey) return email;
 
     try {
-        const decryptedText = decrypt(
-            Buffer.from(email.text, "base64"),
-            privateKey,
-        ).toString();
+        const decryptedText = decryptString(email.text, privateKey);
 
         const decryptedAttachments = await Promise.all(
-            (email.attachments || []).map(async (attachment) => ({
+            email.attachments.map(async (attachment) => ({
                 ...attachment,
-                content: decrypt(attachment.content, privateKey),
+                content: decryptBase64(attachment.content, privateKey),
             })),
         );
 
@@ -88,6 +85,7 @@ export async function getEmail(
             encrypted: true,
         };
     } catch (error) {
+        console.error(error);
         return email;
     }
 }
@@ -112,7 +110,7 @@ export async function sendEmail(
     for (let i = 0; i < filenames.length; i++) {
         attachments.push({
             filename: filenames[i],
-            content: base64ToBuffer(filesBase64[i]),
+            content: filesBase64[i],
         });
     }
 
@@ -131,13 +129,10 @@ export async function sendEmail(
     let success = false;
 
     if (receiverPublicKey) {
-        const encryptedText = encrypt(
-            Buffer.from(text),
-            receiverPublicKey,
-        ).toString("base64");
+        const encryptedText = encryptString(text, receiverPublicKey);
         const encryptedAttachments = attachments.map((attachment) => ({
             ...attachment,
-            content: encrypt(attachment.content, receiverPublicKey),
+            content: encryptBase64(attachment.content, receiverPublicKey),
         }));
 
         const encryptedEmail = {
@@ -187,7 +182,7 @@ export async function saveDraft(
     for (let i = 0; i < filenames.length; i++) {
         attachments.push({
             filename: filenames[i],
-            content: base64ToBuffer(filesBase64[i]),
+            content: filesBase64[i],
         });
     }
 
@@ -217,17 +212,14 @@ async function saveToMailboxEncrypted(
         return;
     }
 
-    const receiverPublicKey = await getPublicKey(session.user.email);
-    if (!receiverPublicKey) return;
+    const publicKey = await getPublicKey(session.user.email);
+    if (!publicKey) return;
 
-    const encryptedText = encrypt(
-        Buffer.from(email.text),
-        receiverPublicKey,
-    ).toString("base64");
+    const encryptedText = encryptString(email.text, publicKey);
 
     const encryptedAttachments = email.attachments.map((attachment) => ({
         ...attachment,
-        content: encrypt(attachment.content, receiverPublicKey),
+        content: encryptBase64(attachment.content, publicKey),
     }));
 
     const encryptedEmail = {

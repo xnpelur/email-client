@@ -16,7 +16,6 @@ import { FilePicker } from "@/components/file-picker";
 import { Attachment, Email } from "@/types/email";
 import { useRouter } from "next/navigation";
 import { AttachmentView } from "@/components/attachment-view";
-import { bufferToBase64 } from "@/lib/utils";
 
 type Props = {
     email?: Email;
@@ -35,7 +34,7 @@ export function NewEmailDialog({ email, hideTrigger, onClose }: Props) {
     const handleSubmit = async (formData: FormData) => {
         attachments.forEach((attachment) => {
             formData.append("files-name", attachment.filename);
-            formData.append("files-base64", bufferToBase64(attachment.content));
+            formData.append("files-base64", attachment.content);
         });
 
         const success = await sendEmail(formData, email?.seqNo);
@@ -60,10 +59,7 @@ export function NewEmailDialog({ email, hideTrigger, onClose }: Props) {
                     const formData = new FormData(formRef.current!);
                     attachments.forEach((attachment) => {
                         formData.append("files-name", attachment.filename);
-                        formData.append(
-                            "files-base64",
-                            bufferToBase64(attachment.content),
-                        );
+                        formData.append("files-base64", attachment.content);
                     });
 
                     const receiver = formData.get("receiver");
@@ -152,12 +148,7 @@ export function NewEmailDialog({ email, hideTrigger, onClose }: Props) {
                                         className="flex items-center justify-between rounded-md border border-slate-300 bg-slate-100 px-2 py-1"
                                     >
                                         <AttachmentView
-                                            attachment={{
-                                                filename: attachment.filename,
-                                                base64: bufferToBase64(
-                                                    attachment.content,
-                                                ),
-                                            }}
+                                            attachment={attachment}
                                         />
                                         <Button
                                             variant="ghost"

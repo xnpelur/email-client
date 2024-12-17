@@ -17,5 +17,5 @@ export type Email = {
 
 export type Attachment = {
     filename: string;
-    content: Buffer;
+    content: string;
 };

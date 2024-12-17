@@ -2,6 +2,7 @@ import { PaperclipIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
 import { Attachment } from "@/types/email";
+import { bufferToBase64 } from "@/lib/utils";
 
 interface FilePickerProps {
     attachments: Attachment[];
@@ -19,7 +20,7 @@ export function FilePicker({ attachments, setAttachments }: FilePickerProps) {
         const newAttachments = await Promise.all(
             Array.from(newFiles ?? []).map(async (file) => ({
                 filename: file.name,
-                content: Buffer.from(await file.arrayBuffer()),
+                content: bufferToBase64(Buffer.from(await file.arrayBuffer())),
             })),
         );
 

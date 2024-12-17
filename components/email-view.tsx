@@ -130,12 +130,7 @@ export default function EmailView({
                             {email.attachments.map((attachment, index) => (
                                 <AttachmentView
                                     key={index}
-                                    attachment={{
-                                        filename: attachment.filename,
-                                        base64: bufferToBase64(
-                                            attachment.content,
-                                        ),
-                                    }}
+                                    attachment={attachment}
                                 />
                             ))}
                         </div>
