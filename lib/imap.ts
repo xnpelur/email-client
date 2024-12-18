@@ -184,7 +184,6 @@ export async function getEmailBySeqNo(
                                 const to = header.to?.[0];
 
                                 const bodyParseResult = parseBody(buffer);
-                                console.log(bodyParseResult);
 
                                 resolve({
                                     seqNo,

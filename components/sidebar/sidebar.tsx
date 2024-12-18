@@ -1,11 +1,12 @@
 import { UserCircleIcon } from "lucide-react";
-import { NewEmailDialog } from "../new-email-dialog";
+import { NewEmailDialog } from "@/components/new-email-dialog";
 import { NavigationPanel } from "@/components/sidebar/navigation-panel";
 import { getSession } from "@/lib/auth";
 import { buttonVariants } from "@/components/ui/button";
 import { LogOutIcon } from "lucide-react";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
+
+import Link from "next/link";
 
 export async function Sidebar() {
     const session = await getSession();
@@ -14,9 +15,9 @@ export async function Sidebar() {
     }
 
     return (
-        <aside className="flex h-full w-64 flex-col justify-between p-4 pt-8">
+        <aside className="flex h-full w-64 flex-col justify-between p-4">
             <div className="space-y-4">
-                <div className="flex h-10 items-center gap-2">
+                <div className="flex h-[56px] items-center gap-2">
                     <div className="h-6 w-6">
                         <UserCircleIcon className="text-slate-600" />
                     </div>

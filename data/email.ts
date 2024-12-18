@@ -1,6 +1,6 @@
 "use server";
 
-import { Email } from "@/types/email";
+import { Attachment, Email } from "@/types/email";
 import * as imap from "@/lib/imap";
 import * as smtp from "@/lib/smtp";
 import { getSession } from "@/lib/auth";
@@ -12,6 +12,7 @@ import {
     encryptString,
 } from "@/lib/encryption";
 import { getPublicKey, getPrivateKey } from "@/data/keys";
+import { extractSignedContent, signContent } from "@/lib/sign";
 
 export async function getEmails(
     mailbox: keyof User["mailboxes"],
@@ -30,19 +31,14 @@ export async function getEmails(
     const decryptedEmails = await Promise.all(
         emails.map(async (email) => {
             try {
-                const decryptedText = decryptString(email.text, privateKey);
-
-                const decryptedAttachments = await Promise.all(
-                    (email.attachments || []).map(async (attachment) => ({
-                        ...attachment,
-                        content: decryptBase64(attachment.content, privateKey),
-                    })),
-                );
-
                 return {
                     ...email,
-                    text: decryptedText,
-                    attachments: decryptedAttachments,
+                    text: decryptAndExtractText(email.text, "", privateKey),
+                    attachments: decryptAndExtractAttachments(
+                        email.attachments,
+                        "",
+                        privateKey,
+                    ),
                     encrypted: true,
                 };
             } catch (error) {
@@ -62,26 +58,26 @@ export async function getEmail(
     if (!session) throw new Error("Unauthorized");
 
     const email = await imap.getEmailBySeqNo(mailbox, sequenceNumber);
+
     const privateKey = await getPrivateKey(
         session.user.email,
         session.user.password,
     );
-    if (!privateKey) return email;
+    const publicKey = await getPublicKey(email.from.address);
+
+    if (!publicKey || !privateKey) {
+        return email;
+    }
 
     try {
-        const decryptedText = decryptString(email.text, privateKey);
-
-        const decryptedAttachments = await Promise.all(
-            email.attachments.map(async (attachment) => ({
-                ...attachment,
-                content: decryptBase64(attachment.content, privateKey),
-            })),
-        );
-
         return {
             ...email,
-            text: decryptedText,
-            attachments: decryptedAttachments,
+            text: decryptAndExtractText(email.text, publicKey, privateKey),
+            attachments: decryptAndExtractAttachments(
+                email.attachments,
+                publicKey,
+                privateKey,
+            ),
             encrypted: true,
         };
     } catch (error) {
@@ -126,22 +122,28 @@ export async function sendEmail(
     };
 
     const receiverPublicKey = await getPublicKey(receiver);
+    const senderPrivateKey = await getPrivateKey(
+        session.user.email,
+        session.user.password,
+    );
+
     let success = false;
 
-    if (receiverPublicKey) {
-        const encryptedText = encryptString(text, receiverPublicKey);
-        const encryptedAttachments = attachments.map((attachment) => ({
-            ...attachment,
-            content: encryptBase64(attachment.content, receiverPublicKey),
-        }));
-
+    if (receiverPublicKey && senderPrivateKey) {
         const encryptedEmail = {
             ...email,
-            text: encryptedText,
-            attachments: encryptedAttachments,
+            text: signAndEncryptText(
+                email.text,
+                receiverPublicKey,
+                senderPrivateKey,
+            ),
+            attachments: signAndEncryptAttachments(
+                email.attachments,
+                receiverPublicKey,
+                senderPrivateKey,
+            ),
             encrypted: true,
         };
-
         success = await smtp.sendEmail(encryptedEmail);
     } else {
         success = await smtp.sendEmail(email);
@@ -213,21 +215,69 @@ async function saveToMailboxEncrypted(
     }
 
     const publicKey = await getPublicKey(session.user.email);
-    if (!publicKey) return;
+    const privateKey = await getPrivateKey(
+        session.user.email,
+        session.user.password,
+    );
 
-    const encryptedText = encryptString(email.text, publicKey);
-
-    const encryptedAttachments = email.attachments.map((attachment) => ({
-        ...attachment,
-        content: encryptBase64(attachment.content, publicKey),
-    }));
+    if (!publicKey || !privateKey) {
+        return;
+    }
 
     const encryptedEmail = {
         ...email,
-        text: encryptedText,
-        attachments: encryptedAttachments,
+        text: signAndEncryptText(email.text, publicKey, privateKey),
+        attachments: signAndEncryptAttachments(
+            email.attachments,
+            publicKey,
+            privateKey,
+        ),
         encrypted: true,
     };
 
     await imap.saveToMailbox(encryptedEmail, mailbox, ["\\Seen"]);
+}
+
+function signAndEncryptText(
+    text: string,
+    publicKey: string,
+    privateKey: string,
+) {
+    return encryptString(signContent(text, privateKey), publicKey);
+}
+
+function signAndEncryptAttachments(
+    attachments: Attachment[],
+    publicKey: string,
+    privateKey: string,
+) {
+    return attachments.map((attachment) => ({
+        ...attachment,
+        content: encryptBase64(
+            signContent(attachment.content, privateKey),
+            publicKey,
+        ),
+    }));
+}
+
+function decryptAndExtractText(
+    text: string,
+    publicKey: string,
+    privateKey: string,
+) {
+    return extractSignedContent(decryptString(text, privateKey), publicKey);
+}
+
+function decryptAndExtractAttachments(
+    attachments: Attachment[],
+    publicKey: string,
+    privateKey: string,
+) {
+    return attachments.map((attachment) => ({
+        ...attachment,
+        content: extractSignedContent(
+            decryptBase64(attachment.content, privateKey),
+            publicKey,
+        ),
+    }));
 }
