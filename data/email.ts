@@ -16,37 +16,7 @@ import {
 export async function getEmails(
     mailbox: keyof User["mailboxes"],
 ): Promise<Email[]> {
-    const session = await getSession();
-    if (!session) return [];
-
-    const emails = await imap.getEmails(mailbox);
-
-    const privateKey = await getPrivateKey(
-        session.user.email,
-        session.user.password,
-    );
-    if (!privateKey) return emails;
-
-    const decryptedEmails = await Promise.all(
-        emails.map(async (email) => {
-            try {
-                return {
-                    ...email,
-                    text: decryptAndExtractText(email.text, "", privateKey),
-                    attachments: decryptAndExtractAttachments(
-                        email.attachments,
-                        "",
-                        privateKey,
-                    ),
-                    encrypted: true,
-                };
-            } catch (error) {
-                return email;
-            }
-        }),
-    );
-
-    return decryptedEmails;
+    return imap.getEmails(mailbox);
 }
 
 export async function getEmail(
@@ -172,6 +142,11 @@ export async function saveDraft(
     formData: FormData,
     seqNo: number,
 ): Promise<void> {
+    const session = await getSession();
+    if (!session?.user) {
+        return;
+    }
+
     const receiver = formData.get("receiver") as string;
     const subject = formData.get("subject") as string;
     const text = formData.get("text") as string;
@@ -189,7 +164,7 @@ export async function saveDraft(
 
     const email: Email = {
         seqNo,
-        from: { name: "", address: "" },
+        from: { name: "", address: session.user.email },
         to: { name: "", address: receiver },
         subject,
         date: new Date(),
