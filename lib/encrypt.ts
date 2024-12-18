@@ -5,28 +5,6 @@ import {
     publicEncrypt,
     privateDecrypt,
 } from "crypto";
-import {
-    base64ToBuffer,
-    bufferToBase64,
-    bufferToString,
-    stringToBuffer,
-} from "@/lib/utils";
-
-export function encryptBase64(data: string, publicKey: string): string {
-    return bufferToBase64(encrypt(base64ToBuffer(data), publicKey));
-}
-
-export function decryptBase64(data: string, privateKey: string): string {
-    return bufferToBase64(decrypt(base64ToBuffer(data), privateKey));
-}
-
-export function encryptString(data: string, publicKey: string): string {
-    return bufferToBase64(encrypt(stringToBuffer(data), publicKey));
-}
-
-export function decryptString(data: string, privateKey: string): string {
-    return bufferToString(decrypt(base64ToBuffer(data), privateKey));
-}
 
 export function encrypt(data: Buffer, publicKey: string): Buffer {
     const tripleDESKey = randomBytes(24);

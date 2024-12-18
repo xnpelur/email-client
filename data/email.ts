@@ -1,18 +1,17 @@
 "use server";
 
-import { Attachment, Email } from "@/types/email";
 import * as imap from "@/lib/imap";
 import * as smtp from "@/lib/smtp";
+import { Email } from "@/types/email";
 import { getSession } from "@/lib/auth";
 import { User } from "@/types/auth";
-import {
-    encryptBase64,
-    decryptBase64,
-    decryptString,
-    encryptString,
-} from "@/lib/encryption";
 import { getPublicKey, getPrivateKey } from "@/data/keys";
-import { extractSignedContent, signContent } from "@/lib/sign";
+import {
+    signAndEncryptText,
+    signAndEncryptAttachments,
+    decryptAndExtractText,
+    decryptAndExtractAttachments,
+} from "@/lib/sign-encrypt";
 
 export async function getEmails(
     mailbox: keyof User["mailboxes"],
@@ -236,48 +235,4 @@ async function saveToMailboxEncrypted(
     };
 
     await imap.saveToMailbox(encryptedEmail, mailbox, ["\\Seen"]);
-}
-
-function signAndEncryptText(
-    text: string,
-    publicKey: string,
-    privateKey: string,
-) {
-    return encryptString(signContent(text, privateKey), publicKey);
-}
-
-function signAndEncryptAttachments(
-    attachments: Attachment[],
-    publicKey: string,
-    privateKey: string,
-) {
-    return attachments.map((attachment) => ({
-        ...attachment,
-        content: encryptBase64(
-            signContent(attachment.content, privateKey),
-            publicKey,
-        ),
-    }));
-}
-
-function decryptAndExtractText(
-    text: string,
-    publicKey: string,
-    privateKey: string,
-) {
-    return extractSignedContent(decryptString(text, privateKey), publicKey);
-}
-
-function decryptAndExtractAttachments(
-    attachments: Attachment[],
-    publicKey: string,
-    privateKey: string,
-) {
-    return attachments.map((attachment) => ({
-        ...attachment,
-        content: extractSignedContent(
-            decryptBase64(attachment.content, privateKey),
-            publicKey,
-        ),
-    }));
 }
